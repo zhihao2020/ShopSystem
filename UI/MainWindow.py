@@ -2,16 +2,18 @@
 
 # Form implementation generated from reading ui file '主界面.ui'
 #
-# Created by: PyQt5 UI code generator 5.11.3
+# Created by: PyQt5 UI code generator 5.13.0
 #
 # WARNING! All changes made in this file will be lost!
 
+
 from PyQt5 import QtCore, QtGui, QtWidgets
+
 
 class Ui_mainWindow(object):
     def setupUi(self, mainWindow):
         mainWindow.setObjectName("mainWindow")
-        mainWindow.resize(1373, 800)
+        mainWindow.resize(930, 703)
         font = QtGui.QFont()
         font.setBold(False)
         font.setWeight(50)
@@ -49,11 +51,12 @@ class Ui_mainWindow(object):
         self.horizontalLayout_3.setObjectName("horizontalLayout_3")
         spacerItem2 = QtWidgets.QSpacerItem(3000, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout_3.addItem(spacerItem2)
-        self.toolButton = QtWidgets.QToolButton(self.centralwidget)
-        self.toolButton.setToolButtonStyle(QtCore.Qt.ToolButtonIconOnly)
-        self.toolButton.setAutoRaise(False)
-        self.toolButton.setObjectName("toolButton")
-        self.horizontalLayout_3.addWidget(self.toolButton)
+        self.pushButton = QtWidgets.QPushButton(self.centralwidget)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(":/pic/search.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.pushButton.setIcon(icon)
+        self.pushButton.setObjectName("pushButton")
+        self.horizontalLayout_3.addWidget(self.pushButton)
         self.thing_name = QtWidgets.QLineEdit(self.centralwidget)
         self.thing_name.setMinimumSize(QtCore.QSize(200, 30))
         self.thing_name.setInputMask("")
@@ -125,6 +128,10 @@ class Ui_mainWindow(object):
         self.horizontalLayout_2.setObjectName("horizontalLayout_2")
         spacerItem6 = QtWidgets.QSpacerItem(200, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout_2.addItem(spacerItem6)
+        self.lineEdit = QtWidgets.QLineEdit(self.centralwidget)
+        self.lineEdit.setMaxLength(1)
+        self.lineEdit.setObjectName("lineEdit")
+        self.horizontalLayout_2.addWidget(self.lineEdit)
         self.pushButton_2 = QtWidgets.QPushButton(self.centralwidget)
         self.pushButton_2.setMaximumSize(QtCore.QSize(200, 40))
         self.pushButton_2.setObjectName("pushButton_2")
@@ -134,7 +141,7 @@ class Ui_mainWindow(object):
         self.horizontalLayout_6.addLayout(self.verticalLayout_2)
         mainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(mainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1373, 26))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 930, 26))
         self.menubar.setObjectName("menubar")
         self.menu = QtWidgets.QMenu(self.menubar)
         self.menu.setObjectName("menu")
@@ -153,6 +160,9 @@ class Ui_mainWindow(object):
         self.edit_things = QtWidgets.QAction(mainWindow)
         self.edit_things.setObjectName("edit_things")
         self.print_things = QtWidgets.QAction(mainWindow)
+        icon1 = QtGui.QIcon()
+        icon1.addPixmap(QtGui.QPixmap(":/pic/print.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.print_things.setIcon(icon1)
         self.print_things.setObjectName("print_things")
         self.refreash = QtWidgets.QAction(mainWindow)
         self.refreash.setObjectName("refreash")
@@ -164,21 +174,23 @@ class Ui_mainWindow(object):
         self.my_people.setObjectName("my_people")
         self.action_2 = QtWidgets.QAction(mainWindow)
         self.action_2.setObjectName("action_2")
+        self.look_Cust = QtWidgets.QAction(mainWindow)
+        self.look_Cust.setObjectName("look_Cust")
         self.menu.addAction(self.print_things)
         self.menu.addAction(self.refreash)
         self.menu_2.addAction(self.action_2)
         self.menu_2.addAction(self.add_things)
         self.menu_2.addAction(self.edit_things)
         self.menu_2.addAction(self.import_CSV)
-        self.menu_3.addAction(self.get_all_activities)
         self.menu_3.addAction(self.my_people)
+        self.menu_3.addAction(self.look_Cust)
         self.menubar.addAction(self.menu.menuAction())
         self.menubar.addAction(self.menu_2.menuAction())
         self.menubar.addAction(self.menu_3.menuAction())
         self.menubar.addAction(self.menu_4.menuAction())
 
         self.retranslateUi(mainWindow)
-        self.tabWidget.setCurrentIndex(1)
+        self.tabWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(mainWindow)
 
     def retranslateUi(self, mainWindow):
@@ -186,11 +198,13 @@ class Ui_mainWindow(object):
         mainWindow.setWindowTitle(_translate("mainWindow", "系统主界面"))
         self.label.setText(_translate("mainWindow", "名字"))
         self.label_2.setText(_translate("mainWindow", "电话"))
-        self.toolButton.setText(_translate("mainWindow", "..."))
+        self.pushButton.setText(_translate("mainWindow", "搜索"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("mainWindow", "药品"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("mainWindow", "手法"))
         self.name_vaild.setText(_translate("mainWindow", "余额"))
         self.label_4.setText(_translate("mainWindow", "积分"))
+        self.lineEdit.setInputMask(_translate("mainWindow", "1"))
+        self.lineEdit.setText(_translate("mainWindow", "1"))
         self.pushButton_2.setText(_translate("mainWindow", "结账"))
         self.menu.setTitle(_translate("mainWindow", "文件"))
         self.menu_2.setTitle(_translate("mainWindow", "编辑"))
@@ -203,7 +217,7 @@ class Ui_mainWindow(object):
         self.refreash.setShortcut(_translate("mainWindow", "F4"))
         self.import_CSV.setText(_translate("mainWindow", "导入CSV"))
         self.get_all_activities.setText(_translate("mainWindow", "商业活动"))
-        self.my_people.setText(_translate("mainWindow", "员工"))
+        self.my_people.setText(_translate("mainWindow", "员工薪酬"))
         self.action_2.setText(_translate("mainWindow", "添加用户"))
-
-
+        self.look_Cust.setText(_translate("mainWindow", "查看用户记录"))
+import image_rc
