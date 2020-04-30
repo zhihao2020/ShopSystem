@@ -2,11 +2,13 @@
 
 # Form implementation generated from reading ui file '添加商品.ui'
 #
-# Created by: PyQt5 UI code generator 5.11.3
+# Created by: PyQt5 UI code generator 5.13.0
 #
 # WARNING! All changes made in this file will be lost!
 
+
 from PyQt5 import QtCore, QtGui, QtWidgets
+
 
 class Ui_Form(object):
     def setupUi(self, Form):
@@ -14,39 +16,48 @@ class Ui_Form(object):
         Form.resize(427, 389)
         Form.setMinimumSize(QtCore.QSize(427, 389))
         Form.setMaximumSize(QtCore.QSize(427, 389))
-        self.add_thing = QtWidgets.QPushButton(Form)
-        self.add_thing.setGeometry(QtCore.QRect(260, 330, 93, 28))
-        self.add_thing.setObjectName("add_thing")
-        self.layoutWidget = QtWidgets.QWidget(Form)
-        self.layoutWidget.setGeometry(QtCore.QRect(50, 60, 325, 250))
-        self.layoutWidget.setObjectName("layoutWidget")
-        self.gridLayout = QtWidgets.QGridLayout(self.layoutWidget)
-        self.gridLayout.setContentsMargins(0, 0, 0, 0)
+        self.horizontalLayout = QtWidgets.QHBoxLayout(Form)
+        self.horizontalLayout.setObjectName("horizontalLayout")
+        self.gridLayout = QtWidgets.QGridLayout()
         self.gridLayout.setObjectName("gridLayout")
-        spacerItem = QtWidgets.QSpacerItem(20, 50, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        self.gridLayout.addItem(spacerItem, 1, 0, 1, 1)
-        self.label_2 = QtWidgets.QLabel(self.layoutWidget)
-        self.label_2.setObjectName("label_2")
-        self.gridLayout.addWidget(self.label_2, 2, 0, 1, 1)
-        self.label_3 = QtWidgets.QLabel(self.layoutWidget)
-        self.label_3.setObjectName("label_3")
-        self.gridLayout.addWidget(self.label_3, 4, 0, 1, 1)
-        self.beizhu = QtWidgets.QTextEdit(self.layoutWidget)
-        self.beizhu.setObjectName("beizhu")
-        self.gridLayout.addWidget(self.beizhu, 4, 2, 1, 1)
-        self.add_thing_price = QtWidgets.QLineEdit(self.layoutWidget)
-        self.add_thing_price.setObjectName("add_thing_price")
-        self.gridLayout.addWidget(self.add_thing_price, 2, 2, 1, 1)
-        spacerItem1 = QtWidgets.QSpacerItem(70, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.gridLayout.addItem(spacerItem1, 4, 1, 1, 1)
-        self.label = QtWidgets.QLabel(self.layoutWidget)
+        self.label = QtWidgets.QLabel(Form)
         self.label.setObjectName("label")
         self.gridLayout.addWidget(self.label, 0, 0, 1, 1)
-        self.add_thing_name = QtWidgets.QLineEdit(self.layoutWidget)
+        self.add_thing_name = QtWidgets.QLineEdit(Form)
         self.add_thing_name.setObjectName("add_thing_name")
         self.gridLayout.addWidget(self.add_thing_name, 0, 2, 1, 1)
-        spacerItem2 = QtWidgets.QSpacerItem(20, 50, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        self.gridLayout.addItem(spacerItem2, 3, 0, 1, 1)
+        self.label_4 = QtWidgets.QLabel(Form)
+        self.label_4.setObjectName("label_4")
+        self.gridLayout.addWidget(self.label_4, 1, 0, 1, 1)
+        self.comboBox = QtWidgets.QComboBox(Form)
+        self.comboBox.setObjectName("comboBox")
+        self.comboBox.addItem("")
+        self.comboBox.addItem("")
+        self.gridLayout.addWidget(self.comboBox, 1, 2, 1, 1)
+        self.label_2 = QtWidgets.QLabel(Form)
+        self.label_2.setObjectName("label_2")
+        self.gridLayout.addWidget(self.label_2, 2, 0, 1, 1)
+        spacerItem = QtWidgets.QSpacerItem(70, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.gridLayout.addItem(spacerItem, 4, 1, 1, 1)
+        self.beizhu = QtWidgets.QTextEdit(Form)
+        self.beizhu.setObjectName("beizhu")
+        self.gridLayout.addWidget(self.beizhu, 4, 2, 1, 1)
+        self.label_3 = QtWidgets.QLabel(Form)
+        self.label_3.setObjectName("label_3")
+        self.gridLayout.addWidget(self.label_3, 4, 0, 1, 1)
+        self.add_thing = QtWidgets.QPushButton(Form)
+        self.add_thing.setObjectName("add_thing")
+        self.gridLayout.addWidget(self.add_thing, 5, 2, 1, 1)
+        self.doubleSpinBox = QtWidgets.QDoubleSpinBox(Form)
+        self.doubleSpinBox.setObjectName("doubleSpinBox")
+        self.gridLayout.addWidget(self.doubleSpinBox, 2, 2, 1, 1)
+        self.label_5 = QtWidgets.QLabel(Form)
+        self.label_5.setObjectName("label_5")
+        self.gridLayout.addWidget(self.label_5, 3, 0, 1, 1)
+        self.spinBox = QtWidgets.QSpinBox(Form)
+        self.spinBox.setObjectName("spinBox")
+        self.gridLayout.addWidget(self.spinBox, 3, 2, 1, 1)
+        self.horizontalLayout.addLayout(self.gridLayout)
 
         self.retranslateUi(Form)
         QtCore.QMetaObject.connectSlotsByName(Form)
@@ -54,8 +65,11 @@ class Ui_Form(object):
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
         Form.setWindowTitle(_translate("Form", "添加商品"))
-        self.add_thing.setText(_translate("Form", "添加"))
+        self.label.setText(_translate("Form", "商品名称"))
+        self.label_4.setText(_translate("Form", "类别"))
+        self.comboBox.setItemText(0, _translate("Form", "商品"))
+        self.comboBox.setItemText(1, _translate("Form", "手法"))
         self.label_2.setText(_translate("Form", "商品价格"))
         self.label_3.setText(_translate("Form", "简介"))
-        self.label.setText(_translate("Form", "商品名称"))
-
+        self.add_thing.setText(_translate("Form", "添加"))
+        self.label_5.setText(_translate("Form", "数量"))
