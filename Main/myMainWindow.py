@@ -9,6 +9,7 @@ from Main.Addthing import addThing
 from Main.customerData import lookCustData
 import datetime
 import logging
+from Main.connectPrinter import Printmain
 
 logging.basicConfig(filename='ProgramLog.txt',level=logging.DEBUG,
                     format='%(asctime)s - %(levelname)s - %(message)s')
@@ -192,10 +193,10 @@ class reload_mainWin(QMainWindow,Ui_mainWindow):
     def connect_LCD(self):
         try:
             if self.cust_name.text():
-                MONERY = "SELECT (药品)可用金额,(手法)可用金额,积分 from 顾客 where 姓名 = '%s'"%(self.cust_name.text())
+                MONERY = "SELECT 药品可用金额,手法可用余额,积分 from 顾客 where 姓名 = '%s'"%(self.cust_name.text())
 
             else :
-                MONERY = "SELECT (药品)可用金额,(手法)可用金额,积分 from 顾客 where 电话='%s'"%(self.cust_phone.text())
+                MONERY = "SELECT 药品可用金额,手法可用余额,积分 from 顾客 where 电话='%s'"%(self.cust_phone.text())
             print("连接LCD\n",MONERY)
             self.query.exec_(MONERY)
             while(self.query.next()):
@@ -203,6 +204,7 @@ class reload_mainWin(QMainWindow,Ui_mainWindow):
                 self.money_vaild.display(self.query.value(1))
                 self.jifen.display(self.query.value(2))
         except:
+            logging.warning("LCD没有连接")
             pass
 
     def jiesuan(self, name):
@@ -216,7 +218,7 @@ class reload_mainWin(QMainWindow,Ui_mainWindow):
         now = datetime.datetime.today().strftime('%d/%m/%Y')
         if self.lineEdit_2.text() :
             while(i < self.showYaopin.rowCount()):
-                # 复选框、名称、价格、数量
+                # 复选框、类别、名称、价格、数量
                 lines.append([self.showYaopin.cellWidget(i, 0), '商品',self.showYaopin.item(i, 1), self.showYaopin.item(i, 2),
                               self.showYaopin.cellWidget(i, 5)])
                 i += 1
@@ -226,15 +228,16 @@ class reload_mainWin(QMainWindow,Ui_mainWindow):
                 i+=1
             for line in lines:
                 if line[0].checkState() == Qt.Checked:
-                    if line[1].text() == '手法':
-                        sum_Things += float(line[3].text()) * float(line[4].Value())
+                    print(line[4].value())
+                    if line[1] == '手法':
+                        sum_Things += float(line[3].text()) * float(line[4].value())
                         fin_Things = sum_Things * float(self.lineEdit.text())
-                    if line[1].text() == '商品':
-                        sum_Hand += float(line[3].text()) * float(line[4].Value())
+                    if line[1] == '商品':
+                        sum_Hand += float(line[3].text()) * float(line[4].value())
                         fin_Hand = sum_Hand * float(self.lineEdit.text())
-                    di[line[1].text()] = float(line[3].Value())  # 加入已选的名称
-                    sum += float(line[2].text()) * float(line[3].Value())
-                    log += [line[1].text(),line[2].text(),line[3].text()] #购买记录[[a,b,a],[c,d,v]]
+                    di[line[2].text()] = float(line[4].value())  # 加入已选的名称
+                    sum += float(line[3].text()) * float(line[4].value())
+                    log += [line[2].text(),line[3].text(),line[4].value()] #购买记录[[a,b,a],[c,d,v]] 名称、价格、数量
             fin = sum * float(self.lineEdit.text())
             reply = QMessageBox.information(self, '提示', '消费金额%s' % fin, QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
 
@@ -242,7 +245,7 @@ class reload_mainWin(QMainWindow,Ui_mainWindow):
                 logging.info('产生消费记录')
                 #提交到log数据表
                 if self.cust_name.text():
-                    self.query.exec_("insert into log(顾客姓名,购买记录,购买时间,工号,金额) values('%s','%s','%s','%s')"
+                    self.query.exec_("insert into log(顾客姓名,购买记录,购买时间,工号,金额) values('%s','%s','%s','%s','%s')"
                                      % (self.cust_name.text(),log,now,self.lineEdit_2.text(),fin))
                 elif self.cust_phone.text():
                     self.query.exec_("insert into log(电话,购买记录,购买时间,工号) values('%s','%s','%s','%s')"
@@ -258,7 +261,7 @@ class reload_mainWin(QMainWindow,Ui_mainWindow):
                         self.query2.exec_("update things set 库存数量 = '%s' where 名称 ='%s'"
                                           % (float(self.query2.value(0)) - di[name], name))
                 # 更改用户信息
-                self.query.exec_("SELECT 积分,(药品)可用金额,(手法)可用金额 from 顾客 where 姓名 = '%s'" % self.cust_name.text())
+                self.query.exec_("SELECT 积分,药品可用金额,手法可用金额 from 顾客 where 姓名 = '%s'" % self.cust_name.text())
 
                 try:
                     jifen = float(self.query.value(0)) + float(fin_Things)
@@ -268,11 +271,12 @@ class reload_mainWin(QMainWindow,Ui_mainWindow):
                     pass
                 keyongThing = float(self.query.value(1)) - float(fin_Things)
                 #更改顾客信息（顾客数据表）
-                self.query.exec_("update 顾客 set 积分 = '%s',(药品)可用金额='%s',(手法)可用金额='%s' where 姓名 ='%s'"
+                self.query.exec_("update 顾客 set 积分 = '%s',药品可用金额='%s',手法可用金额='%s' where 姓名 ='%s'"
                                  % (jifen, keyongThing,keyongHand ,self.cust_name.text()))
                 self.query.exec_("update 员工 set 时间 = '%s',记录='%s',金额='%s' where 工号 ='%s'"
-                                 % (now, log,fin,))
-        else:print(QMessageBox.information(self, '提示', '请输入员工工号' , QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes))
+                                 % (now, self.log,fin,))
+                Printmain(log,fin)#打印小票信息
+        else:print(QMessageBox.information(self, '提示', '请输入员工工号', QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes))
 
     #关闭数据库
     def closeEvent(self,event):
