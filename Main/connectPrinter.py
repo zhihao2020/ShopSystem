@@ -21,4 +21,4 @@ def Printmain(data,fin):
     p.output()
 
 if __name__ == '__main__':
-    main()
+    Printmain()

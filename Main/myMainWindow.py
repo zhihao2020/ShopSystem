@@ -228,7 +228,6 @@ class reload_mainWin(QMainWindow,Ui_mainWindow):
                 i+=1
             for line in lines:
                 if line[0].checkState() == Qt.Checked:
-                    print(line[4].value())
                     if line[1] == '手法':
                         sum_Things += float(line[3].text()) * float(line[4].value())
                         fin_Things = sum_Things * float(self.lineEdit.text())
@@ -253,29 +252,30 @@ class reload_mainWin(QMainWindow,Ui_mainWindow):
                 for name in di.keys():
                     print("结算", name)
                     self.query2.exec_("SELECT 库存数量 from things where 名称='%s'" % name)
-                    if (float(self.query2.value(0)) - di[name] < 0):
-                        print(QMessageBox.critical(self, '警告', '%s商品库存不足\n现有库存%s' % (name, self.query2.value(0)),
-                                                   QMessageBox.Yes | QMessageBox.No, QMessageBox.No))
-                    else:
-                        #更改商品信息
-                        self.query2.exec_("update things set 库存数量 = '%s' where 名称 ='%s'"
-                                          % (float(self.query2.value(0)) - di[name], name))
+                    while (self.query2.next()):
+                        if (float(self.query2.value(0)) - di[name] < 0):
+                            print(QMessageBox.critical(self, '警告', '%s商品库存不足\n现有库存%s' % (name, self.query2.value(0)),
+                                                       QMessageBox.Yes | QMessageBox.No, QMessageBox.No))
+                        else:
+                            #更改商品信息
+                            self.query2.exec_("update things set 库存数量 = '%s' where 名称 ='%s'"
+                                              % (float(self.query2.value(0)) - di[name], name))
                 # 更改用户信息
                 self.query.exec_("SELECT 积分,药品可用金额,手法可用金额 from 顾客 where 姓名 = '%s'" % self.cust_name.text())
-
-                try:
-                    jifen = float(self.query.value(0)) + float(fin_Things)
-                    keyongHand = float(self.query.value(2)) - float(fin_Hand)
-                except:
-                    logging.info('这次消费没有手法')
-                    pass
-                keyongThing = float(self.query.value(1)) - float(fin_Things)
-                #更改顾客信息（顾客数据表）
-                self.query.exec_("update 顾客 set 积分 = '%s',药品可用金额='%s',手法可用金额='%s' where 姓名 ='%s'"
-                                 % (jifen, keyongThing,keyongHand ,self.cust_name.text()))
-                self.query.exec_("update 员工 set 时间 = '%s',记录='%s',金额='%s' where 工号 ='%s'"
-                                 % (now, self.log,fin,))
-                Printmain(log,fin)#打印小票信息
+                while(self.query.next()):
+                    try:
+                        jifen = float(self.query.value(0)) + float(fin_Things)
+                        keyongHand = float(self.query.value(2)) - float(fin_Hand) #有问题？？
+                    except:
+                        logging.info('这次消费没有手法')
+                        pass
+                    keyongThing = float(self.query.value(1)) - float(fin_Things)    #有问题？？？
+                    #更改顾客信息（顾客数据表）
+                    self.query.exec_("update 顾客 set 积分 = '%s',药品可用金额='%s',手法可用金额='%s' where 姓名 ='%s'"
+                                     % (jifen, keyongThing,keyongHand ,self.cust_name.text()))
+                    self.query.exec_("update 员工 set 时间 = '%s',记录='%s',金额='%s' where 工号 ='%s'"
+                                     % (now, log,fin,))
+                    Printmain(log,fin)#打印小票信息
         else:print(QMessageBox.information(self, '提示', '请输入员工工号', QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes))
 
     #关闭数据库
