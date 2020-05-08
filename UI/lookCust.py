@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '查看用户信息.ui'
 #
-# Created by: PyQt5 UI code generator 5.13.0
+# Created by: PyQt5 UI code generator 5.14.2
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -91,6 +91,9 @@ class Ui_Form(object):
         self.horizontalLayout_4.setObjectName("horizontalLayout_4")
         spacerItem4 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout_4.addItem(spacerItem4)
+        self.label_2 = QtWidgets.QLabel(Form)
+        self.label_2.setObjectName("label_2")
+        self.horizontalLayout_4.addWidget(self.label_2)
         self.lineEdit_4 = QtWidgets.QLineEdit(Form)
         self.lineEdit_4.setMinimumSize(QtCore.QSize(120, 0))
         self.lineEdit_4.setMaximumSize(QtCore.QSize(120, 16777215))
@@ -117,3 +120,4 @@ class Ui_Form(object):
         self.label_5.setText(_translate("Form", "商品名称"))
         self.label_6.setText(_translate("Form", "购买数量(yes/no)"))
         self.pushButton.setText(_translate("Form", "生成"))
+        self.label_2.setText(_translate("Form", "查询"))

@@ -13,7 +13,7 @@ def Printmain(data,fin):
         price = x[1]
         num = x[2]
         p.add_line(name,'    ',price,'   ',num)
-    p.add_line("合计："+fin)
+    p.add_line("合计： "+fin)
     p.add_line("**************")
     p.add_line("欢迎光临，谢谢惠顾！")
     p.add_line("医琦健康中心")

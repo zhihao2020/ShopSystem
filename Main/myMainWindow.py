@@ -5,6 +5,7 @@ from PyQt5 import QtCore
 import sys
 import webbrowser
 from UI.MainWindow import Ui_mainWindow
+from Main.Addpeople import addPeople
 from Main.Addthing import addThing
 from Main.customerData import lookCustData
 import datetime
@@ -35,16 +36,16 @@ class reload_mainWin(QMainWindow,Ui_mainWindow):
 
         # this is QAction
         self.refreash.triggered.connect(self.reFreash)
-        self.print_things.triggered.connect(self.printXiaopiao)
+
         self.add_things.triggered.connect(self.addInformation)
-        self.action_2.triggered.connect(self.addPeople)
+        self.action_2.triggered.connect(self.addPeople_init)
         self.edit_things.triggered.connect(self.editThing)
         self.action.triggered.connect(self.about)
         self.look_Cust.triggered.connect(self.lookCust)
 
         # 按钮
         self.pushButton_2.clicked.connect(self.jiesuan)
-
+        self.pushButton.clicked.connect(self.init_find)
         # 触发LCD
         self.cust_name.textChanged.connect(self.connect_LCD)
         self.cust_phone.textChanged.connect(self.connect_LCD)
@@ -52,14 +53,11 @@ class reload_mainWin(QMainWindow,Ui_mainWindow):
         self.showThings()
         self.showThings2()
         self.tabWidget.currentChanged['int'].connect(self.currentTab)
-
-        # 触发查询
-        self.thing_name.textChanged.connect(self.find_Thing)
         self.index = 0
-
         #窗口
         self.addThingForm = addThing()
         self.lookCust_Data = lookCustData()
+        self.addPeopleForm = addPeople()
 
     def about(self):
         webbrowser.open_new_tab('https://zhihao2020.github.io/about/')
@@ -70,10 +68,13 @@ class reload_mainWin(QMainWindow,Ui_mainWindow):
         elif index == 1:
             self.index = 1
 
-    def find_Thing(self):
+    def init_find(self):
+        self.find_Thing(self.thing_name.text())
+
+    def find_Thing(self,name):
         if self.index == 0:
             try:
-                items = self.showYaopin.findItems(self.thing_name.text(), QtCore.Qt.MatchExactly)
+                items = self.showYaopin.findItems(name, QtCore.Qt.MatchExactly)
                 item = items[0]
                 # 选中单元格
                 item.setSelected(True)
@@ -162,9 +163,6 @@ class reload_mainWin(QMainWindow,Ui_mainWindow):
             i += 1
         self.showShoufa.show()
 
-    def printXiaopiao(self):
-        pass
-
     def addInformation(self):
         self.addThingForm.Signal_FivesParameter.connect(self.addThing)
         self.addThingForm.setWindowModality(Qt.ApplicationModal)
@@ -175,20 +173,52 @@ class reload_mainWin(QMainWindow,Ui_mainWindow):
         if reply == QMessageBox.Yes:
             #加入验证 避免反复添加
             if self.query.exec_("select 名称 from things where 名称='%s'"%lis[0]):
-                QMessageBox.critical(self, '警告', '请勿重复添加', QMessageBox.Yes)
+                QMessageBox.critical(self, '警告', '将对该商品修改', QMessageBox.Yes)
+                self.query.exec_("select 库存数量 from things where 名称='%s'"%lis[0])
+                num = self.query.value(0) + lis[3]
+                if lis[3]:
+                    self.query.exec_("update things set (名称,价格,库存数量) values('%s','%s'.'%s')" % (lis[0], lis[2],num))
+                else:
+                    self.query.exec_("update things set (名称,库存数量) values('%s','%s')"%(lis[0],num))
             else:
+                print(QMessageBox.information(self, "提示", '将要添加商品', QMessageBox.Yes))
                 self.query.exec_("insert into things(名称,类别,价格,库存,备注) values('%s','%s','%s','%s','%s')" % (lis[0], lis[1],lis[2],lis[3],lis[4]))
                 print(QMessageBox.information(self,"提示",'添加成功',QMessageBox.Yes))
                 logging.info('添加商品%s'%lis[0])
+
+    def addPeople_init(self):
+        self.addPeopleForm.Signal_FivesParameter.connect(self.addPeople)
+        self.addPeopleForm.setWindowModality(Qt.ApplicationModal)
+        self.addPeopleForm.show()
+
+    def addPeople(self,lis):
+        reply = QMessageBox.information(self, '提示', '数据将会被添加', QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
+        if reply == QMessageBox.Yes:
+            # 加入验证 避免反复添加
+            if self.query.exec_("select 姓名 from 顾客 where 姓名='%s'" % lis[0]):
+                QMessageBox.information(self, '提示', '将对该用户进行充值', QMessageBox.Yes)
+                self.query.exec_("SELECT 手法余额,商品余额 from 顾客 where 姓名 ='%s'"%lis[0])
+                shoufa = self.query.value(0) +lis[2]
+                shangpin = self.query.value(1) +lis[3]
+                if lis[2]:
+                    self.query.exec_("update 顾客 set (姓名,手法余额,商品余额) values('%s','%s','%s')" % (
+                        lis[0],  shoufa, shangpin))
+                else:
+                    self.query.exec_("update 顾客 set (姓名,电话,手法余额,商品余额) values('%s','%s','%s','%s')" % (
+                        lis[0], lis[1],shoufa, shangpin))
+                logging.info('用户充值：%s' % lis[0])
+            else:
+                QMessageBox.information(self, '提示', '将添加用户', QMessageBox.Yes)
+                self.query.exec_("insert into 顾客(姓名,年龄,电话,手法余额,商品余额) values('%s','%s','%s','%s','%s')" % (
+                lis[0], lis[1], lis[2], lis[3],lis[4]))
+                print(QMessageBox.information(self, "提示", '添加成功', QMessageBox.Yes))
+                logging.info('添加用户%s' % lis[0])
 
     def editThing(self):
         pass
 
     def lookCust(self):
         self.lookCust_Data.show()
-
-    def addPeople(self):
-        pass
 
     def connect_LCD(self):
         try:
@@ -213,6 +243,8 @@ class reload_mainWin(QMainWindow,Ui_mainWindow):
         sum = 0
         sum_Hand = 0 #手法的总价
         sum_Things=0    #商品的总价
+        fin_Hand = 0  # 最后应该缴纳的手法价钱
+        fin_Things = 0  # 最后应该缴纳的商品价钱
         log = []      # 购买记录
         i = 0
         now = datetime.datetime.today().strftime('%d/%m/%Y')
@@ -224,9 +256,10 @@ class reload_mainWin(QMainWindow,Ui_mainWindow):
                 i += 1
             while(i < self.showShoufa.rowCount()):
                 lines.append([self.showShoufa.cellWidget(i, 0), '手法',self.showShoufa.item(i, 1), self.showShoufa.item(i, 2),
-                              self.showYaopin.cellWidget(i, 4)])
+                              self.showYaopin.cellWidget(i, 5)])
                 i+=1
             for line in lines:
+                # 复选框、类别、名称、价格、数量
                 if line[0].checkState() == Qt.Checked:
                     if line[1] == '手法':
                         sum_Things += float(line[3].text()) * float(line[4].value())
@@ -234,7 +267,7 @@ class reload_mainWin(QMainWindow,Ui_mainWindow):
                     if line[1] == '商品':
                         sum_Hand += float(line[3].text()) * float(line[4].value())
                         fin_Hand = sum_Hand * float(self.lineEdit.text())
-                    di[line[2].text()] = float(line[4].value())  # 加入已选的名称
+                    di[line[2].text()] = float(line[4].value())  # 加入已选的名称和数量 构成字典
                     sum += float(line[3].text()) * float(line[4].value())
                     log += [line[2].text(),line[3].text(),line[4].value()] #购买记录[[a,b,a],[c,d,v]] 名称、价格、数量
             fin = sum * float(self.lineEdit.text())
@@ -242,13 +275,7 @@ class reload_mainWin(QMainWindow,Ui_mainWindow):
 
             if reply == QMessageBox.Yes:
                 logging.info('产生消费记录')
-                #提交到log数据表
-                if self.cust_name.text():
-                    self.query.exec_("insert into log(顾客姓名,购买记录,购买时间,工号,金额) values('%s','%s','%s','%s','%s')"
-                                     % (self.cust_name.text(),log,now,self.lineEdit_2.text(),fin))
-                elif self.cust_phone.text():
-                    self.query.exec_("insert into log(电话,购买记录,购买时间,工号) values('%s','%s','%s','%s')"
-                                     % (self.cust_phone.text(), log, now, self.lineEdit_2.text()))
+
                 for name in di.keys():
                     print("结算", name)
                     self.query2.exec_("SELECT 库存数量 from things where 名称='%s'" % name)
@@ -257,25 +284,45 @@ class reload_mainWin(QMainWindow,Ui_mainWindow):
                             print(QMessageBox.critical(self, '警告', '%s商品库存不足\n现有库存%s' % (name, self.query2.value(0)),
                                                        QMessageBox.Yes | QMessageBox.No, QMessageBox.No))
                         else:
-                            #更改商品信息
-                            self.query2.exec_("update things set 库存数量 = '%s' where 名称 ='%s'"
-                                              % (float(self.query2.value(0)) - di[name], name))
-                # 更改用户信息
-                self.query.exec_("SELECT 积分,药品可用金额,手法可用金额 from 顾客 where 姓名 = '%s'" % self.cust_name.text())
-                while(self.query.next()):
-                    try:
-                        jifen = float(self.query.value(0)) + float(fin_Things)
-                        keyongHand = float(self.query.value(2)) - float(fin_Hand) #有问题？？
-                    except:
-                        logging.info('这次消费没有手法')
-                        pass
-                    keyongThing = float(self.query.value(1)) - float(fin_Things)    #有问题？？？
-                    #更改顾客信息（顾客数据表）
-                    self.query.exec_("update 顾客 set 积分 = '%s',药品可用金额='%s',手法可用金额='%s' where 姓名 ='%s'"
-                                     % (jifen, keyongThing,keyongHand ,self.cust_name.text()))
-                    self.query.exec_("update 员工 set 时间 = '%s',记录='%s',金额='%s' where 工号 ='%s'"
-                                     % (now, log,fin,))
-                    Printmain(log,fin)#打印小票信息
+                            # 更改用户信息
+                            self.query.exec_("SELECT 积分,药品可用金额,手法可用金额 from 顾客 where 姓名 = '%s'" % self.cust_name.text())
+                            while (self.query.next()):
+                                if float(self.query.value(2)) - float(fin_Hand) < 0:
+                                    print(QMessageBox.critical(self, '警告',
+                                                               '%手法余额不足\n现有手法余额%s' % (name, self.query2.value(2)),
+                                                               QMessageBox.Yes, QMessageBox.Yes))
+                                    raise Exception
+                                elif float(self.query.value(1)) - float(fin_Things)<0:
+                                    print(QMessageBox.critical(self, '警告',
+                                                               '%商品余额不足\n现有商品余额%s' % (name, self.query2.value(1)),
+                                                               QMessageBox.Yes, QMessageBox.Yes))
+                                    raise Exception
+                                else:
+
+                                    keyongHand = float(self.query.value(2)) - float(fin_Hand)  # 有问题？？
+                                    jifen = float(self.query.value(0)) + float(fin_Things)
+
+                                    keyongThing = float(self.query.value(1)) - float(fin_Things)  # 有问题？？？
+                                    # 更改顾客信息（顾客数据表）
+                                    self.query.exec_("update 顾客 set 积分 = '%s',药品可用金额='%s',手法可用金额='%s' where 姓名 ='%s'"
+                                                 % (jifen, keyongThing, keyongHand, self.cust_name.text()))
+                                    self.query.exec_("update 员工 set 时间 = '%s',记录='%s',金额='%s' where 工号 ='%s'"
+                                                 % (now, log, fin,))
+
+                                    #更改商品信息
+                                    self.query2.exec_("update things set 库存数量 = '%s' where 名称 ='%s'"
+                                                      % (float(self.query2.value(0)) - di[name], name))
+                                    # 提交到log数据表
+                                    if self.cust_name.text():
+                                        self.query.exec_(
+                                            "insert into log(顾客姓名,购买记录,购买时间,工号,金额) values('%s','%s','%s','%s','%s')"
+                                            % (self.cust_name.text(), log, now, self.lineEdit_2.text(), fin))
+                                    elif self.cust_phone.text():
+                                        self.query.exec_("insert into log(电话,购买记录,购买时间,工号) values('%s','%s','%s','%s')"
+                                                         % (self.cust_phone.text(), log, now, self.lineEdit_2.text()))
+
+                                    Printmain(log, fin)  # 打印小票信息
+
         else:print(QMessageBox.information(self, '提示', '请输入员工工号', QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes))
 
     #关闭数据库

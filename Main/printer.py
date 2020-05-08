@@ -1,7 +1,7 @@
 # coding=utf-8
 import win32print
 import textwrap
-
+from PyQt5.QtWidgets import QMessageBox
 class Printer:
     PRINTER_NAME = "GP-5850II"
     LINE_WIDTH = 40
@@ -24,7 +24,10 @@ class Printer:
         self.lines.append(self.wrap(data))
 
     def output(self):
-        hPrinter = win32print.OpenPrinter(self.PRINTER_NAME)
+        try:
+            hPrinter = win32print.OpenPrinter(self.PRINTER_NAME)
+        except:
+            QMessageBox.information(self,"提示","没有连接打印机 或 没有配置打印机")
         try:
             win32print.StartDocPrinter(hPrinter, 1, ("Notification", None, "RAW"))
             try:
