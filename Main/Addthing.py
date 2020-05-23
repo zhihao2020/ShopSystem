@@ -11,9 +11,9 @@ class addThing(QWidget,Ui_Form):
     def emitSingal(self):
         name = self.add_thing_name.text()
         kind = self.comboBox.currentText()
-        price = self.doubleSpinBox.Value()
-        num = self.spinBox.Value()
-        beizhu = self.beizhu.text()
+        price = self.doubleSpinBox.value()
+        num = self.spinBox.value()
+        beizhu = self.lineEdit.text()
         lis =[name,kind,price,num,beizhu]
         self.Signal_FivesParameter[list].emit(lis)
 

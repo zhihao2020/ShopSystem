@@ -1,8 +1,10 @@
 # coding=utf-8
 import win32print
+import logging
 import textwrap
 from PyQt5.QtWidgets import QMessageBox
 class Printer:
+    #使用的打印机 名称为GP-5850II
     PRINTER_NAME = "GP-5850II"
     LINE_WIDTH = 40
     lines = []
@@ -17,7 +19,6 @@ class Printer:
         split = [data[i] for i in range(0, len(data))]
         orig_str = "".join(split)
         new_str = "\n".join(textwrap.wrap(orig_str, width))
-
         return new_str
 
     def add_line(self, data):
@@ -28,6 +29,7 @@ class Printer:
             hPrinter = win32print.OpenPrinter(self.PRINTER_NAME)
         except:
             QMessageBox.information(self,"提示","没有连接打印机 或 没有配置打印机")
+            logging.error("没有连接打印机 或 没有配置打印机")
         try:
             win32print.StartDocPrinter(hPrinter, 1, ("Notification", None, "RAW"))
             try:

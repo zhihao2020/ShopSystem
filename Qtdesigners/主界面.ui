@@ -203,6 +203,12 @@
               <height>100</height>
              </size>
             </property>
+            <property name="digitCount">
+             <number>9</number>
+            </property>
+            <property name="intValue" stdset="0">
+             <number>0</number>
+            </property>
            </widget>
           </item>
          </layout>
@@ -247,6 +253,9 @@
             <width>200</width>
             <height>100</height>
            </size>
+          </property>
+          <property name="digitCount">
+           <number>9</number>
           </property>
          </widget>
         </item>
@@ -302,6 +311,21 @@
             <width>200</width>
             <height>100</height>
            </size>
+          </property>
+          <property name="digitCount">
+           <number>9</number>
+          </property>
+          <property name="mode">
+           <enum>QLCDNumber::Dec</enum>
+          </property>
+          <property name="segmentStyle">
+           <enum>QLCDNumber::Filled</enum>
+          </property>
+          <property name="value" stdset="0">
+           <double>0.000000000000000</double>
+          </property>
+          <property name="intValue" stdset="0">
+           <number>0</number>
           </property>
          </widget>
         </item>
@@ -388,7 +412,6 @@
     <property name="title">
      <string>文件</string>
     </property>
-    <addaction name="print_things"/>
     <addaction name="refreash"/>
    </widget>
    <widget class="QMenu" name="menu_2">
@@ -397,8 +420,6 @@
     </property>
     <addaction name="action_2"/>
     <addaction name="add_things"/>
-    <addaction name="edit_things"/>
-    <addaction name="import_CSV"/>
    </widget>
    <widget class="QMenu" name="menu_3">
     <property name="title">

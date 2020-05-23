@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '主界面.ui'
 #
-# Created by: PyQt5 UI code generator 5.13.0
+# Created by: PyQt5 UI code generator 5.14.2
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -103,6 +103,8 @@ class Ui_mainWindow(object):
         self.horizontalLayout.addItem(spacerItem3)
         self.money_vaild_2 = QtWidgets.QLCDNumber(self.centralwidget)
         self.money_vaild_2.setMinimumSize(QtCore.QSize(200, 100))
+        self.money_vaild_2.setDigitCount(9)
+        self.money_vaild_2.setProperty("intValue", 0)
         self.money_vaild_2.setObjectName("money_vaild_2")
         self.horizontalLayout.addWidget(self.money_vaild_2)
         self.horizontalLayout_3.addLayout(self.horizontalLayout)
@@ -122,6 +124,7 @@ class Ui_mainWindow(object):
         self.horizontalLayout_3.addItem(spacerItem4)
         self.money_vaild = QtWidgets.QLCDNumber(self.centralwidget)
         self.money_vaild.setMinimumSize(QtCore.QSize(200, 100))
+        self.money_vaild.setDigitCount(9)
         self.money_vaild.setObjectName("money_vaild")
         self.horizontalLayout_3.addWidget(self.money_vaild)
         self.line_3 = QtWidgets.QFrame(self.centralwidget)
@@ -141,6 +144,11 @@ class Ui_mainWindow(object):
         self.horizontalLayout_3.addItem(spacerItem6)
         self.jifen = QtWidgets.QLCDNumber(self.centralwidget)
         self.jifen.setMinimumSize(QtCore.QSize(200, 100))
+        self.jifen.setDigitCount(9)
+        self.jifen.setMode(QtWidgets.QLCDNumber.Dec)
+        self.jifen.setSegmentStyle(QtWidgets.QLCDNumber.Filled)
+        self.jifen.setProperty("value", 0.0)
+        self.jifen.setProperty("intValue", 0)
         self.jifen.setObjectName("jifen")
         self.horizontalLayout_3.addWidget(self.jifen)
         self.horizontalLayout_7.addLayout(self.horizontalLayout_3)
@@ -211,12 +219,9 @@ class Ui_mainWindow(object):
         self.look_Cust.setObjectName("look_Cust")
         self.action = QtWidgets.QAction(mainWindow)
         self.action.setObjectName("action")
-        self.menu.addAction(self.print_things)
         self.menu.addAction(self.refreash)
         self.menu_2.addAction(self.action_2)
         self.menu_2.addAction(self.add_things)
-        self.menu_2.addAction(self.edit_things)
-        self.menu_2.addAction(self.import_CSV)
         self.menu_3.addAction(self.my_people)
         self.menu_3.addAction(self.look_Cust)
         self.menu_4.addAction(self.action)

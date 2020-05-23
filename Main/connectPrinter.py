@@ -12,13 +12,10 @@ def Printmain(data,fin):
         name = x[0]
         price = x[1]
         num = x[2]
-        p.add_line(name,'    ',price,'   ',num)
-    p.add_line("合计： "+fin)
+        p.add_line(name+'    '+str(price)+'   '+str(num))
+    p.add_line("合计： "+str(fin))
     p.add_line("**************")
     p.add_line("欢迎光临，谢谢惠顾！")
-    p.add_line("医琦健康中心")
+    p.add_line("医琦健康调理中心")
     p.add_line("\n")
     p.output()
-
-if __name__ == '__main__':
-    Printmain()
