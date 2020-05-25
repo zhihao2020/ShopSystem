@@ -13,16 +13,19 @@ class lookCustData(QWidget,Ui_Form):
         self.db = QSqlDatabase.addDatabase('QSQLITE', "db3")
         self.db.setDatabaseName('../data/all.db')
         self.db.open()
-        if self.db.open() is None:
-            print(QMessageBox.critical(self, "警告", "数据库连接失败，请查看数据库配置", QMessageBox.Yes))
         self.query = QSqlQuery(self.db)
         self.lineEdit.textChanged.connect(self.showInfo)
         self.lineEdit_3.textChanged.connect(self.showInfo)
+        self.lineEdit_4.textChanged.connect(self.find_Thing)
+
     def get_Row(self):
+        if self.db.open() is None:
+            print(QMessageBox.critical(self, "警告", "数据库连接失败，请查看数据库配置", QMessageBox.Yes))
         try:
             n = 0
             if self.lineEdit.text():
-                self.query.exec_("SELECT * from log where 姓名='{}'".format(self.lineEdit.text()))
+                self.query.exec_("SELECT * from log where 顾客姓名='{}'".format(self.lineEdit.text()))
+                print("SELECT * from log where 顾客姓名='{}'".format(self.lineEdit.text()))
             elif self.lineEdit_3.text():
                 self.query.exec_("SELECT * from log where 电话='{}'".format(self.lineEdit_3.text()))
             while (self.query.next()):
@@ -32,16 +35,22 @@ class lookCustData(QWidget,Ui_Form):
         except:
             print(QMessageBox.critical(self, "警告", "输入顾客 姓名或电话", QMessageBox.Yes))
             pass
+    def click(self,item):
+        QMessageBox.information(self,"信息",self.tableWidget.item(item.row(),0).text())
 
     def showInfo(self):
         self.tableWidget.setColumnCount(4)
         self.tableWidget.setRowCount(self.get_Row())
         self.tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.tableWidget.setHorizontalHeaderLabels(["购买记录","购买时间","金额","工号"])
+        self.tableWidget.resizeColumnsToContents()
+        self.tableWidget.resizeRowsToContents()
         self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)  # 设置表格自适应
+        self.tableWidget.clicked.connect(self.click)
         i = 0
         if self.lineEdit.text():
-            self.query.exec_("SELECT 购买记录,购买时间,金额,工号 from log where 姓名='%s'" % self.lineEdit.text())
+            self.query.exec_("SELECT 购买记录,购买时间,金额,工号 from log where 顾客姓名='%s'" % self.lineEdit.text())
+
         elif self.lineEdit_3.text:
             self.query.exec_("SELECT 购买记录,购买时间,金额,工号 from log where 电话='%s'" % self.lineEdit_3.text())
 
@@ -54,13 +63,16 @@ class lookCustData(QWidget,Ui_Form):
 
     def find_Thing(self):
         try:
-            items = self.tableWidget.findItems(self.lineEdit_4.text(), QtCore.Qt.MatchExactly)
-            item = items[0]
-            # 选中单元格
-            item.setSelected(True)
-            row = item.row()
-            # 滚轮定位过去，
-            self.tableWidget.verticalScrollBar().setSliderPosition(row)
+            items = self.tableWidget.findItems(self.lineEdit_4.text(), QtCore.Qt.MatchStartsWith)
+            if len(items) > 0:
+                for n in range(items):
+                    print(n)
+                    item = items[n]
+                    item.setSelected(True)
+                item = items[0]
+                row = item.row()
+                # 定位到指定的行
+                self.tableWidget.verticalScrollBar().setSliderPosition(row)
         except:
             pass
 

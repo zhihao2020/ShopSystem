@@ -101,6 +101,7 @@ class Ui_Form(object):
         self.horizontalLayout_4.addWidget(self.lineEdit_4)
         self.verticalLayout_2.addLayout(self.horizontalLayout_4)
         self.tableWidget = QtWidgets.QTableWidget(Form)
+        self.tableWidget.setMinimumSize(QtCore.QSize(800, 0))
         self.tableWidget.setObjectName("tableWidget")
         self.tableWidget.setColumnCount(0)
         self.tableWidget.setRowCount(0)

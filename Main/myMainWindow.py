@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import *
-from PyQt5.QtSql import QSqlDatabase,QSqlQuery,QSqlTableModel,QSqlQueryModel,QSqlError,QSqlField
+from PyQt5.QtSql import QSqlDatabase,QSqlQuery
 from PyQt5.QtCore import Qt
 from PyQt5 import QtCore
 import sys
@@ -13,7 +13,7 @@ import logging
 from Main.connectPrinter import Printmain
 
 logging.basicConfig(filename='ProgramLog.log',level=logging.DEBUG,
-                    format='%(asctime)s - %(levelname)s - %(message)s')
+                    format='%(asctime)s - %(levelname)s - %(message)s:')
 
 class reload_mainWin(QMainWindow,Ui_mainWindow):
 
@@ -259,7 +259,7 @@ class reload_mainWin(QMainWindow,Ui_mainWindow):
                 MONERY = "SELECT 药品可用金额,手法可用余额,积分 from 顾客 where 姓名 = '%s'"%(self.cust_name.text())
 
             else :
-                MONERY = "SELECT 药品可用金额,手法可用余额,积分 from 顾客 where 电话='%s'"%(self.cust_phone.text())
+                MONERY = "SELECT 药品可用金额,手法可用余额,积分 from 顾客 where 电话=%s"%(self.cust_phone.text())
             self.query.exec_(MONERY)
             while(self.query.next()):
                 self.money_vaild_2.display(self.query.value(0))
@@ -365,7 +365,7 @@ class reload_mainWin(QMainWindow,Ui_mainWindow):
                                          % (self.cust_phone.text(), log, now, self.lineEdit_2.text(),fin))
                         text = "insert into log(电话,购买记录,购买时间,工号,金额) values('%s','%s','%s','%s','%s')"% (self.cust_phone.text(), log, now, self.lineEdit_2.text(),fin)
                         logging.info(text)
-                    Printmain(log, fin)  # 打印小票信息
+                    Printmain(log, fin,keyongThing,keyongHand)  # 打印小票信息
 
         else:
             print(QMessageBox.information(self, '提示', '请输入员工工号', QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes))
