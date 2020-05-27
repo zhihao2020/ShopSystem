@@ -214,26 +214,6 @@
          </layout>
         </item>
         <item>
-         <widget class="Line" name="line_2">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="name_vaild">
-          <property name="font">
-           <font>
-            <family>AcadEref</family>
-            <pointsize>16</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>手法可用余额</string>
-          </property>
-         </widget>
-        </item>
-        <item>
          <spacer name="horizontalSpacer">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -245,19 +225,6 @@
            </size>
           </property>
          </spacer>
-        </item>
-        <item>
-         <widget class="QLCDNumber" name="money_vaild">
-          <property name="minimumSize">
-           <size>
-            <width>200</width>
-            <height>100</height>
-           </size>
-          </property>
-          <property name="digitCount">
-           <number>9</number>
-          </property>
-         </widget>
         </item>
         <item>
          <widget class="Line" name="line_3">
@@ -354,19 +321,6 @@
       <item>
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
-         <widget class="QLineEdit" name="lineEdit">
-          <property name="inputMask">
-           <string>1</string>
-          </property>
-          <property name="text">
-           <string>1</string>
-          </property>
-          <property name="maxLength">
-           <number>1</number>
-          </property>
-         </widget>
-        </item>
-        <item>
          <layout class="QHBoxLayout" name="horizontalLayout_2">
           <item>
            <widget class="QLabel" name="label_3">
@@ -420,6 +374,7 @@
     </property>
     <addaction name="action_2"/>
     <addaction name="add_things"/>
+    <addaction name="action_3"/>
    </widget>
    <widget class="QMenu" name="menu_3">
     <property name="title">
@@ -445,36 +400,12 @@
     <string>添加商品</string>
    </property>
   </action>
-  <action name="edit_things">
-   <property name="text">
-    <string>编辑商品</string>
-   </property>
-  </action>
-  <action name="print_things">
-   <property name="icon">
-    <iconset resource="../images/image.qrc">
-     <normaloff>:/pic/print.ico</normaloff>:/pic/print.ico</iconset>
-   </property>
-   <property name="text">
-    <string>打印</string>
-   </property>
-  </action>
   <action name="refreash">
    <property name="text">
     <string>刷新</string>
    </property>
    <property name="shortcut">
     <string>F4</string>
-   </property>
-  </action>
-  <action name="import_CSV">
-   <property name="text">
-    <string>导入CSV</string>
-   </property>
-  </action>
-  <action name="get_all_activities">
-   <property name="text">
-    <string>商业活动</string>
    </property>
   </action>
   <action name="my_people">
@@ -495,6 +426,11 @@
   <action name="action">
    <property name="text">
     <string>关于作者</string>
+   </property>
+  </action>
+  <action name="action_3">
+   <property name="text">
+    <string>添加新手法</string>
    </property>
   </action>
  </widget>

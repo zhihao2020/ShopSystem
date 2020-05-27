@@ -2,8 +2,9 @@ from PyQt5.QtWidgets import QApplication,QMainWindow,QMessageBox
 from UI.InTo import Ui_widget
 from PyQt5.QtSql import QSqlDatabase,QSqlQuery
 from PyQt5.QtCore import  pyqtSignal
-import myMainWindow
+from Main import myMainWindow
 import sys
+import os
 
 class Load_login(QMainWindow,Ui_widget):
     is_admin_signal = pyqtSignal()
@@ -16,7 +17,8 @@ class Load_login(QMainWindow,Ui_widget):
 
     def post_to_sql(self):
         dbs = QSqlDatabase.addDatabase('QSQLITE')
-        dbs.setDatabaseName(r'..\data\password.db')
+        dbs.setDatabaseName(os.getcwd()+'\data\password.db')
+        dbs.open()
         if dbs.open() is None:
             print(QMessageBox.critical(self, "警告", "数据库连接失败，请查看数据库配置", QMessageBox.Yes, QMessageBox.Yes))
         querys = QSqlQuery()

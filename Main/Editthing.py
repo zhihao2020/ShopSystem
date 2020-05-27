@@ -10,7 +10,7 @@ class editThing(QWidget,Ui_Form):
         self.setupUi(self)
 
         self.db = QSqlDatabase.addDatabase('QSQLITE', "db3")
-        self.db.setDatabaseName(r"..\data\all.db")
+        self.db.setDatabaseName(r"data\all.db")
         self.db.open()
 
         if self.db.open() is None:
