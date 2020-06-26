@@ -214,6 +214,13 @@
          </layout>
         </item>
         <item>
+         <widget class="Line" name="line_2">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
          <spacer name="horizontalSpacer">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -374,7 +381,6 @@
     </property>
     <addaction name="action_2"/>
     <addaction name="add_things"/>
-    <addaction name="action_3"/>
    </widget>
    <widget class="QMenu" name="menu_3">
     <property name="title">
@@ -400,12 +406,36 @@
     <string>添加商品</string>
    </property>
   </action>
+  <action name="edit_things">
+   <property name="text">
+    <string>编辑商品</string>
+   </property>
+  </action>
+  <action name="print_things">
+   <property name="icon">
+    <iconset resource="../images/image.qrc">
+     <normaloff>:/pic/print.ico</normaloff>:/pic/print.ico</iconset>
+   </property>
+   <property name="text">
+    <string>打印</string>
+   </property>
+  </action>
   <action name="refreash">
    <property name="text">
     <string>刷新</string>
    </property>
    <property name="shortcut">
     <string>F4</string>
+   </property>
+  </action>
+  <action name="import_CSV">
+   <property name="text">
+    <string>导入CSV</string>
+   </property>
+  </action>
+  <action name="get_all_activities">
+   <property name="text">
+    <string>商业活动</string>
    </property>
   </action>
   <action name="my_people">
@@ -426,11 +456,6 @@
   <action name="action">
    <property name="text">
     <string>关于作者</string>
-   </property>
-  </action>
-  <action name="action_3">
-   <property name="text">
-    <string>添加新手法</string>
    </property>
   </action>
  </widget>

@@ -1,7 +1,7 @@
-from Main.printer import Printer
+from printer import Printer
 from time import localtime, strftime
 
-def Printmain(data,data2,fin,keyongThing):
+def Printmain(data, fin, keyongThing=None, keyongHand=None):
     p = Printer()
     p.add_line("医琦健康")
     p.add_line("**************")
@@ -14,12 +14,10 @@ def Printmain(data,data2,fin,keyongThing):
         num = x[2]
         p.add_line(name+'    '+str(price)+'   '+str(num))
     p.add_line("合计： "+str(fin))
-    p.add_line("**************")
-    for y in data2:
-        name = y[0]
-        num= y[1]
-        p.add_line(name+'        '+num)
-    p.add_line("可用于购买商品的金额："+str(keyongThing))
+    if keyongHand:
+        p.add_line("可用手法剩余金额："+str(keyongHand))
+    if keyongThing:
+        p.add_line("可用于购买商品的金额："+str(keyongThing))
     p.add_line("**************")
     p.add_line("欢迎光临，谢谢惠顾！")
     p.add_line("医琦健康调理中心")

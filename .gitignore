@@ -2,6 +2,3 @@ __pycache__/
 *.db
 .idea/
 ProgramLog.log
-*.ini
-*.db
-*.io

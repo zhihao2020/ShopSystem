@@ -28,35 +28,14 @@
   <layout class="QHBoxLayout" name="horizontalLayout">
    <item>
     <layout class="QGridLayout" name="gridLayout">
-     <item row="3" column="2">
-      <widget class="QLineEdit" name="lineEdit">
-       <property name="maxLength">
-        <number>999999999</number>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="2">
-      <widget class="QSpinBox" name="spinBox">
-       <property name="maximum">
-        <number>999999999</number>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="0">
+     <item row="4" column="0">
       <widget class="QLabel" name="label_3">
        <property name="text">
         <string>备注</string>
        </property>
       </widget>
      </item>
-     <item row="1" column="0">
-      <widget class="QLabel" name="label_2">
-       <property name="text">
-        <string>商品价格</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="1">
+     <item row="4" column="1">
       <spacer name="horizontalSpacer">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -70,24 +49,34 @@
       </spacer>
      </item>
      <item row="0" column="2">
-      <widget class="QLineEdit" name="add_thing_name">
-       <property name="maxLength">
-        <number>999999999</number>
+      <widget class="QLineEdit" name="add_thing_name"/>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="label_2">
+       <property name="text">
+        <string>商品价格</string>
        </property>
       </widget>
      </item>
-     <item row="6" column="2">
-      <widget class="QPushButton" name="add_thing">
+     <item row="1" column="0">
+      <widget class="QLabel" name="label_4">
        <property name="text">
-        <string>添加</string>
+        <string>类别</string>
        </property>
       </widget>
      </item>
      <item row="1" column="2">
-      <widget class="QDoubleSpinBox" name="doubleSpinBox">
-       <property name="maximum">
-        <double>10000000000000000303786028427003666890752.000000000000000</double>
-       </property>
+      <widget class="QComboBox" name="comboBox">
+       <item>
+        <property name="text">
+         <string>商品</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>手法</string>
+        </property>
+       </item>
       </widget>
      </item>
      <item row="0" column="0">
@@ -97,12 +86,28 @@
        </property>
       </widget>
      </item>
-     <item row="2" column="0">
+     <item row="7" column="2">
+      <widget class="QPushButton" name="add_thing">
+       <property name="text">
+        <string>添加</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
       <widget class="QLabel" name="label_5">
        <property name="text">
         <string>数量</string>
        </property>
       </widget>
+     </item>
+     <item row="2" column="2">
+      <widget class="QDoubleSpinBox" name="doubleSpinBox"/>
+     </item>
+     <item row="3" column="2">
+      <widget class="QSpinBox" name="spinBox"/>
+     </item>
+     <item row="4" column="2">
+      <widget class="QLineEdit" name="lineEdit"/>
      </item>
     </layout>
    </item>

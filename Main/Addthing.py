@@ -18,3 +18,4 @@ class addThing(QWidget,Ui_Form):
         self.Signal_FivesParameter[list].emit(lis)
 
 
+
