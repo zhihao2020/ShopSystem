@@ -24,11 +24,19 @@
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
       <layout class="QGridLayout" name="gridLayout">
-       <item row="4" column="2">
-        <widget class="QDoubleSpinBox" name="doubleSpinBox_2"/>
+       <item row="7" column="2">
+        <widget class="QDoubleSpinBox" name="doubleSpinBox_2">
+         <property name="maximum">
+          <double>999999999.000000000000000</double>
+         </property>
+        </widget>
        </item>
-       <item row="3" column="2">
-        <widget class="QDoubleSpinBox" name="doubleSpinBox"/>
+       <item row="4" column="0">
+        <widget class="QLabel" name="label_2">
+         <property name="text">
+          <string>手法名称</string>
+         </property>
+        </widget>
        </item>
        <item row="0" column="0">
         <widget class="QLabel" name="label">
@@ -37,22 +45,15 @@
          </property>
         </widget>
        </item>
-       <item row="3" column="0">
-        <widget class="QLabel" name="label_2">
-         <property name="text">
-          <string>手法余额</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="0">
+       <item row="7" column="0">
         <widget class="QLabel" name="label_5">
          <property name="text">
           <string>商品余额</string>
          </property>
         </widget>
        </item>
-       <item row="1" column="2">
-        <widget class="QSpinBox" name="spinBox"/>
+       <item row="0" column="2">
+        <widget class="QLineEdit" name="add_thing_name"/>
        </item>
        <item row="1" column="0">
         <widget class="QLabel" name="label_3">
@@ -61,16 +62,40 @@
          </property>
         </widget>
        </item>
-       <item row="0" column="2">
-        <widget class="QLineEdit" name="add_thing_name"/>
-       </item>
        <item row="2" column="2">
         <widget class="QLineEdit" name="lineEdit"/>
+       </item>
+       <item row="1" column="2">
+        <widget class="QSpinBox" name="spinBox"/>
        </item>
        <item row="2" column="0">
         <widget class="QLabel" name="label_4">
          <property name="text">
           <string>电话</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="2">
+        <widget class="QComboBox" name="comboBox"/>
+       </item>
+       <item row="5" column="2">
+        <widget class="QSpinBox" name="spinBox_2">
+         <property name="maximum">
+          <number>99999999</number>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0">
+        <widget class="QLabel" name="label_6">
+         <property name="text">
+          <string>次数</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="1">
+        <widget class="Line" name="line">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
          </property>
         </widget>
        </item>
@@ -87,6 +112,15 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>add_thing_name</tabstop>
+  <tabstop>spinBox</tabstop>
+  <tabstop>lineEdit</tabstop>
+  <tabstop>comboBox</tabstop>
+  <tabstop>spinBox_2</tabstop>
+  <tabstop>doubleSpinBox_2</tabstop>
+  <tabstop>add_thing</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
