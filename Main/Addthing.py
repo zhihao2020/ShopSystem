@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QWidget
 from PyQt5.QtCore import pyqtSignal
-from UI.AddThings import Ui_Form
+from UI.add.AddThings import Ui_Form
 class addThing(QWidget,Ui_Form):
     Signal_FivesParameter = pyqtSignal(list)
     def __init__(self):

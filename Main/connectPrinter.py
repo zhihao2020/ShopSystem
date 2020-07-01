@@ -14,8 +14,10 @@ def Printmain(data, fin, keyongThing=None, keyongHand=None):
         num = x[2]
         p.add_line(name+'    '+str(price)+'   '+str(num))
     p.add_line("合计： "+str(fin))
-    if keyongHand:
-        p.add_line("可用手法剩余金额："+str(keyongHand))
+    for temp in keyongHand:
+        p.add_line("手法名称："+str(temp[0]))
+        p.add_line("剩余次数："+str(temp[1]))
+        p.add_line("         ")
     if keyongThing:
         p.add_line("可用于购买商品的金额："+str(keyongThing))
     p.add_line("**************")

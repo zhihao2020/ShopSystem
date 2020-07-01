@@ -381,6 +381,8 @@
     </property>
     <addaction name="action_2"/>
     <addaction name="add_things"/>
+    <addaction name="action_3"/>
+    <addaction name="action_4"/>
    </widget>
    <widget class="QMenu" name="menu_3">
     <property name="title">
@@ -456,6 +458,16 @@
   <action name="action">
    <property name="text">
     <string>关于作者</string>
+   </property>
+  </action>
+  <action name="action_3">
+   <property name="text">
+    <string>充值手法次数</string>
+   </property>
+  </action>
+  <action name="action_4">
+   <property name="text">
+    <string>充值商品金额</string>
    </property>
   </action>
  </widget>
