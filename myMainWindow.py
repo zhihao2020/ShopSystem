@@ -6,15 +6,15 @@ import sys
 import webbrowser
 from pygame import mixer
 from UI.MainWindow import Ui_mainWindow
-from Main.Addpeople import addPeople
-from Main.Addthing import addThing
-from Main.AddpeopleMoney import addMoney
-from Main.ChangeZhekou import ChangePrice
-from Main.customerData import lookCustData
-from Main.addpeopleNum import addShouNum
+from Addpeople import addPeople
+from Addthing import addThing
+from AddpeopleMoney import addMoney
+from ChangeZhekou import ChangePrice
+from customerData import lookCustData
+from addpeopleNum import addShouNum
 import datetime
 import logging
-from Main.connectPrinter import Printmain
+from  connectPrinter import Printmain
 
 logging.basicConfig(filename='ProgramLog.log',level=logging.DEBUG,format='%(asctime)s - %(levelname)s - %(message)s:')
 
@@ -26,20 +26,22 @@ class reload_mainWin(QMainWindow,Ui_mainWindow):
         self.ThingsList = []
         self.handList = []
         self.init()
+        self.birthDayMusic()
 
     def init(self):
         # 连接数据库
         self.db = QSqlDatabase.addDatabase('QSQLITE', "db2")
-        self.db.setDatabaseName('../data/all.db')
+        self.db.setDatabaseName('data/all.db')
 
         # this is QAction
         self.refreash.triggered.connect(self.reFreash)
         self.add_things.triggered.connect(self.addInformation)
+        self.look_Cust.triggered.connect(self.lookCust)
+        self.action_5.triggered.connect(self.birthDayMusic)
+        self.action_4.triggered.connect(self.init_addUserMoney)
+        self.action_3.triggered.connect(self.init_addUserShouNum)
         self.action_2.triggered.connect(self.addPeople_init)
         self.action.triggered.connect(self.about)
-        self.look_Cust.triggered.connect(self.lookCust)
-        self.action_4.triggered.connect(self.addUserMoney)
-
         # 按钮
         self.pushButton_2.clicked.connect(self.jiesuan)
         self.pushButton.clicked.connect(self.init_find)
@@ -51,15 +53,6 @@ class reload_mainWin(QMainWindow,Ui_mainWindow):
         self.showThings2()
         self.tabWidget.currentChanged['int'].connect(self.currentTab)
         self.index = 0
-        #窗口
-        self.addThingForm = addThing()
-        self.lookCust_Data = lookCustData()
-        self.addPeopleForm = addPeople()
-        self.addPeopleMoney = addMoney()
-        self.addPeopleShouNum = addShouNum()
-        #建立信号连接
-        self.addPeopleMoney.Signal_ThreeParameter.connect(self.addUserMoney)
-        self.addPeopleShouNum.Signal_FourParameter.connect(self.addUserShouNum)
 
     def openDB(self):
         self.db.open()
@@ -75,17 +68,18 @@ class reload_mainWin(QMainWindow,Ui_mainWindow):
 
     def birthDayMusic(self):
         self.openDB()
-        tempText = []
+        tempText = ""
         self.query.exec_("SELECT 姓名,电话,生日 from 顾客 ")
         while (self.query.next()):
-            if self.query.value(2) == datetime.datetime.today().strftime('%d/%m/%Y'):
+            if datetime.datetime.today().strftime('%m/%d') in self.query.value(2):
                 tempText += "姓名:%s ,电话:%s ,生日:%s\n"%(self.query.value(0),self.query.value(1),self.query.value(2))
         if tempText != "":
-            print(QMessageBox.information(self,"提示",tempText,QMessageBox.Yes))
             mixer.init()
-            mixer.music.load(r"..\images\生日歌.mp3")
+            mixer.music.load(r"images\生日歌.mp3")
             mixer.music.play(loops=1, start=0.0)
             mixer.music.set_volume(1)
+            QMessageBox.information(self,"提示",tempText,QMessageBox.Yes)
+
         self.db.close()
 
     def currentTab(self, index):
@@ -95,7 +89,7 @@ class reload_mainWin(QMainWindow,Ui_mainWindow):
             self.index = 1
 
     def init_find(self):
-        self.find_Thing(self.thing_name.text())
+        self.find_Thing(self.thing_name.text().strip())
 
     def find_Thing(self,name):
         #因为这是linetext changed触发的，所以此处加上异常处理
@@ -112,7 +106,7 @@ class reload_mainWin(QMainWindow,Ui_mainWindow):
                 pass
         elif self.index == 1:
             try:
-                items = self.showShoufa.findItems(self.thing_name.text(), QtCore.Qt.MatchExactly)
+                items = self.showShoufa.findItems(self.thing_name.text().strip(), QtCore.Qt.MatchExactly)
                 item = items[0]
                 # 选中单元格
                 item.setSelected(True)
@@ -126,15 +120,18 @@ class reload_mainWin(QMainWindow,Ui_mainWindow):
 
     def reFreash(self):
         #重新刷新
+        self.ThingsList = []
+        self.handList = []
         self.showThings()
         self.showThings2()
+        self.connect_LCD()
 
     def get_Row(self,kind):
         n = 0
         self.query.exec_("SELECT 名称 from things where 类别='{}'".format(kind))
         while(self.query.next()):
             n += 1
-        print("数据库中有",n,"行")
+        #print("数据库中有",n,"行")
         return n
 
     def showThings(self):
@@ -150,17 +147,17 @@ class reload_mainWin(QMainWindow,Ui_mainWindow):
         i = 0
         self.query.exec_("SELECT 名称 from things where 类别='商品'")
         while(self.query.next()):
-            print("商品名称",self.query.value(0))
+            #print("商品名称",self.query.value(0))
             self.ThingsList.append(self.query.value(0))
             self.query2.exec_("SELECT 名称,价格,备注,库存数量 from things where 名称='%s'"%self.query.value(0))
-            print("SELECT 名称,价格,备注 from things where 名称='%s'"%self.query.value(0))
+            #print("SELECT 名称,价格,备注 from things where 名称='%s'"%self.query.value(0))
             while(self.query2.next()):
                 for n in range(4):
-                    print("第",i,"行，","第",n,"列")
+                    #print("第",i,"行，","第",n,"列")
                     ck = QCheckBox()
                     Qs= QSpinBox()
                     newItem = QTableWidgetItem(str(self.query2.value(n)))
-                    print(self.query2.value(n))
+                    #print(self.query2.value(n))
                     self.showYaopin.setCellWidget(i,0,ck)
                     self.showYaopin.setItem(i,n+1,newItem)
                     self.showYaopin.setCellWidget(i,5,Qs)
@@ -175,7 +172,7 @@ class reload_mainWin(QMainWindow,Ui_mainWindow):
         self.showShoufa.setRowCount(self.get_Row('手法'))
         self.showShoufa.setColumnWidth(0, 50)
         self.showShoufa.setEditTriggers(QAbstractItemView.NoEditTriggers)
-        self.showShoufa.setHorizontalHeaderLabels(["","名称","非会员价格","备注","次数","剩余次数"])
+        self.showShoufa.setHorizontalHeaderLabels(["","名称","非会员价格","备注","剩余次数","次数"])
         self.showShoufa.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch) #设置表格自适应
         #self.showShoufa.itemDoubleClicked.connect(self.changPrize)
         i = 0
@@ -186,26 +183,26 @@ class reload_mainWin(QMainWindow,Ui_mainWindow):
             self.query2.exec_("SELECT 名称,价格,备注 from things where 名称='%s'" % self.query.value(0))
             while (self.query2.next()):
                 for n in range(3):
-                    print("第", i, "行，", "第", n, "列")
+                    #print("第", i, "行，", "第", n, "列")
                     ck = QCheckBox()
                     Qs = QSpinBox()
                     newItem = QTableWidgetItem(str(self.query2.value(n)))
                     print(self.query2.value(n))
                     self.showShoufa.setCellWidget(i, 0, ck)
                     self.showShoufa.setItem(i, n + 1, newItem)
-                    self.showShoufa.setCellWidget(i,4, Qs)
-                    self.query3.exec_("SELECT %s from 顾客 where 姓名='%s'" % (self.query2.value(0), self.cust_name.text()))
-                    print("SELECT %s from 顾客 where 姓名='%s'" % (self.query2.value(0), self.cust_name.text()))
+                    self.query3.exec_("SELECT %s from 顾客 where 姓名='%s'" % (self.query2.value(0), self.cust_name.text().strip()))
+                   # print("SELECT %s from 顾客 where 姓名='%s'" % (self.query2.value(0), self.cust_name.text()))
                     while (self.query3.next()):
-                        self.showShoufa.setItem(i, 5, QTableWidgetItem(str(self.query3.value(0))))
+                        self.showShoufa.setItem(i, 4, QTableWidgetItem(str(self.query3.value(0))))
+                    self.showShoufa.setCellWidget(i, 5, Qs)
             i += 1
         self.showShoufa.show()
         self.db.close()
 
     def changPrize(self,item):
-        print(222)
+        #print(222)
         if self.index == 0:
-            print(12,self.showYaopin.item(item.row(),1).text())
+            #print(12,self.showYaopin.item(item.row(),1).text())
             self.change_Pice = ChangePrice(self.showYaopin.item(item.row(),1).text(),self.showYaopin.item(item.row(),2).text(),item.row())
             self.change_Pice.Signal_TwoParameter.connect(self.changePrize2)
             self.change_Pice.setWindowModality(Qt.ApplicationModal)
@@ -223,6 +220,7 @@ class reload_mainWin(QMainWindow,Ui_mainWindow):
             self.showShoufa.setItem(li[1],2,QTableWidgetItem(li[0]))
 
     def addInformation(self):
+        self.addThingForm = addThing()
         self.addThingForm.Signal_FivesParameter.connect(self.addThing)
         self.addThingForm.setWindowModality(Qt.ApplicationModal)
         self.addThingForm.show()
@@ -247,12 +245,12 @@ class reload_mainWin(QMainWindow,Ui_mainWindow):
                         logging.info('修改商品----%s' % text)
         else:
             if lis[1] == "手法":
-                reply = QMessageBox.information(self, "提示", '将要添加商品', QMessageBox.Yes)
+                reply = QMessageBox.information(self, "提示", '将要添加手法', QMessageBox.Yes)
                 if reply == QMessageBox.Yes:
                     self.query.exec_("insert into things(名称,类别,价格,备注) values('%s','%s','%s','%s')" % (
                     lis[0], lis[1], lis[2],  lis[4]))
-                    self.query.exec_("CREATE table 顾客 ('%s',INT)"%(lis[0]))
-                    text = "CREATE table 顾客 ('%s',INT)"%(lis[0])
+                    self.query.exec_("alter table 顾客 add %s int;"%(lis[0]))
+                    text = "alter table 顾客 add %s int;"%(lis[0])
                     print(QMessageBox.information(self, "提示", '添加成功', QMessageBox.Yes))
                     logging.info('添加商品----%s' % text)
             else:
@@ -266,6 +264,7 @@ class reload_mainWin(QMainWindow,Ui_mainWindow):
         self.db.close()
 
     def addPeople_init(self):
+        self.addPeopleForm = addPeople()
         self.addPeopleForm.Signal_FourParameter.connect(self.addPeople)
         self.addPeopleForm.setWindowModality(Qt.ApplicationModal)
         self.addPeopleForm.show()
@@ -276,20 +275,28 @@ class reload_mainWin(QMainWindow,Ui_mainWindow):
         phone = []
         self.openDB()
         self.query.exec_("select 姓名,电话 from 顾客")
+        tempnum =0
         while (self.query.next()):
             name.append(self.query.value(0))
             phone.append(self.query.value(1))
+            tempnum +=1
         if lis[0] in name or lis[1] in phone:
             QMessageBox.information(self, '提示', '该用户已经存在', QMessageBox.Yes)
         
         else:
             reply = QMessageBox.information(self, '提示', '将添加新用户\n 仅仅添加姓名:%s、年龄:%s、电话信息:%s'% (lis[0], lis[1], lis[2]), QMessageBox.Yes|QMessageBox.Yes)
             if reply == QMessageBox.Yes:
-                self.query.exec_("insert into 顾客(姓名,年龄,电话,生日) values('%s','%s','%s','%s')" % (lis[0], lis[1], lis[2],lis[3]))
+                self.query.exec_("insert into 顾客(uid,姓名,年龄,电话,生日) values('%d','%s','%s','%s','%s')" % (tempnum,lis[0], lis[1], lis[2],lis[3]))
                 print(QMessageBox.information(self, "提示", '添加成功', QMessageBox.Yes| QMessageBox.Yes))
-                text = "insert into 顾客(姓名,年龄,电话,生日) values('%s','%s','%s','%s')" % (lis[0], lis[1], lis[2],lis[3])
+                text = "insert into 顾客(uid,姓名,年龄,电话,生日) values('%d','%s','%s','%s','%s')" % (tempnum,lis[0], lis[1], lis[2],lis[3])
                 logging.info('添加用户---%s' %text)
         self.db.close()
+
+    def init_addUserMoney(self):
+        self.addPeopleMoney = addMoney()
+        self.addPeopleMoney.Signal_ThreeParameter.connect(self.addUserMoney)
+        self.addPeopleMoney.setWindowModality(Qt.ApplicationModal)
+        self.addPeopleMoney.show()
 
     def addUserMoney(self,lis):
         self.addPeopleMoney.setWindowModality(Qt.ApplicationModal)
@@ -308,31 +315,32 @@ class reload_mainWin(QMainWindow,Ui_mainWindow):
                 print("SELECT 药品可用金额 from 顾客 where 姓名 ='%s'" % lis[0])
                 while(self.query.next()):
                     print(8688439)
-                    shangpin = float(self.query.value(0)) + float(lis[5])
+                    shangpin = float(self.query.value(0)) + float(lis[2])
                     self.query.exec_("update 顾客 set 药品可用金额=%s where 姓名='%s'" % (shangpin,lis[0]))
                     text = "update 顾客 set 药品可用金额=%s where 姓名='%s'" % (shangpin,lis[0])
                     logging.info('用户修改---%s' %text)
-                self.query.exec_("update 顾客 set %s='%s' where 姓名='%s'" % (lis[3], lis[4], lis[0]))
-                text = "update 顾客 set %s='%s' where 姓名='%s'" % (lis[3], lis[4],lis[0])
-                print(text)
-                logging.info('用户修改---%s' % text)
 
         elif lis[1] in phone:
             reply = QMessageBox.information(self, '提示', '将对该用户%s 进行充值'%lis[1], QMessageBox.Yes)
             if reply == QMessageBox.Yes:
                 self.query.exec_("SELECT 药品可用金额 from 顾客 where 电话 ='%s'"%lis[1])
                 while(self.query.next()):
-                    shangpin = float(self.query.value(0)) +float(lis[5])
+                    shangpin = float(self.query.value(0)) +float(lis[2])
                     self.query.exec_("update 顾客 set 药品可用金额='%s' where 电话='%s'" % (shangpin,lis[1]))
                     text = "update 顾客 set 药品可用金额='%s' where 电话='%s'" % (shangpin,lis[1])
                     logging.info('用户修改---%s' %text)
         else:
-            reply = QMessageBox.information(self, '提示', '不存在该用户', QMessageBox.Yes|QMessageBox.Yes)
+            QMessageBox.information(self, '提示', '不存在该用户', QMessageBox.Yes|QMessageBox.Yes)
         self.db.close()
 
-    def addUserShouNum(self,lis):
+    def init_addUserShouNum(self):
+        print("手法目录：",self.handList)
+        self.addPeopleShouNum = addShouNum(self.handList)
+        self.addPeopleShouNum.Signal_FourParameter.connect(self.addUserShouNum)
         self.addPeopleShouNum.setWindowModality(Qt.ApplicationModal)
         self.addPeopleShouNum.show()
+
+    def addUserShouNum(self,lis):
         name = []
         phone = []
         self.openDB()
@@ -340,33 +348,42 @@ class reload_mainWin(QMainWindow,Ui_mainWindow):
         while (self.query.next()):
             name.append(self.query.value(0))
             phone.append(self.query.value(1))
-        if lis[0] in name or lis[1] in phone:
+        if lis[0] in name :#or lis[1] in phone:
             reply = QMessageBox.information(self, '提示', '对用户充值手法次数', QMessageBox.Yes)
-            if reply == QMessageBox.Yes():
-                self.query.exec_("select %s from 顾客"%lis[2])
-                initNum = 0
+            if reply == QMessageBox.Yes:
+                self.query.exec_("select %s from 顾客 where 姓名='%s' or 电话='%s'"%(lis[2],lis[0],lis[1]))
+                #print("select %s from 顾客 where 姓名='%s' or 电话='%s'"%(lis[2],lis[0],lis[1]))
+                initNum =0
                 while (self.query.next()):
                     initNum = self.query.value(0)
-                Num = initNum + lis[3]
+                    print(initNum)
+                if not initNum:
+                    initNum =0
+                    #print(type(initNum))
+                print(lis[3])
+                Num = initNum + int(lis[3])
+                print("Num ",Num)
                 self.query.exec_("update 顾客 set %s='%s' where 姓名='%s'" % (lis[2], Num, lis[0]))
                 text = "update 顾客 set %s='%s' where 姓名='%s'" % (lis[2], Num, lis[0])
                 #print(text)
                 logging.info('用户修改---%s' % text)
+            else:pass
         else:
             QMessageBox.information(self, '提示', '该用户不存在', QMessageBox.Yes)
             
         self.db.close()
    
     def lookCust(self):
+        self.lookCust_Data = lookCustData()
         self.lookCust_Data.show()
 
     def connect_LCD(self):
         self.openDB()
         try:
-            if self.cust_name.text():
-                MONERY = "SELECT 药品可用金额,积分 from 顾客 where 姓名 = '%s'"%(self.cust_name.text())
+            if self.cust_name.text().strip():
+                MONERY = "SELECT 药品可用金额,积分 from 顾客 where 姓名 = '%s'"%(self.cust_name.text().strip())
             else :
-                MONERY = "SELECT 药品可用金额,积分 from 顾客 where 电话=%s"%(self.cust_phone.text())
+                MONERY = "SELECT 药品可用金额,积分 from 顾客 where 电话=%s"%(self.cust_phone.text().strip())
             self.query.exec_(MONERY)
             while(self.query.next()):
                 self.money_vaild_2.display(self.query.value(0))
@@ -378,17 +395,21 @@ class reload_mainWin(QMainWindow,Ui_mainWindow):
     def jiesuan(self, name):
         self.openDB()
         lines = []
-        flag =False
+        flag = False
+        flag2 = False
         di = {}
         sum = 0
+        sum_Things = 0  # 商品的总价
         HandList = []
-        sum_Things=0    #商品的总价
-        fin_Things = 0  # 最后应该缴纳的商品价钱
         log = []      # 购买记录
+        logtemp =[]
         Hand_FinList = []
+        keyongThing=None
+        jifen=0
+
         i = 0
         now = datetime.datetime.today().strftime('%d/%m/%Y')
-        if self.money_vaild_2.value() == 0:
+        if not self.cust_name.text().strip() and not self.cust_phone.text().strip():
             print(QMessageBox.information(self, '提示','进入非会员模式',QMessageBox.Yes, QMessageBox.Yes))
             while (i < self.showYaopin.rowCount()):
                 # 复选框、类别、名称、价格、数量
@@ -403,6 +424,7 @@ class reload_mainWin(QMainWindow,Ui_mainWindow):
                         sum_Things += float(line[3].text()) * float(line[4].value())
 
                     di[line[2].text()] = float(line[4].value())  # 加入已选的名称和数量 构成字典
+                    logtemp.append([line[2].text(),line[3].text(),line[4].value()])
                     log.append([line[2].text(),line[3].text(),line[4].value()]) #购买记录[[a,b,a],[c,d,v]] 名称、价格、数量
             fin = sum_Things
             reply = QMessageBox.information(self, '提示', '消费金额%s' % fin, QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
@@ -416,9 +438,9 @@ class reload_mainWin(QMainWindow,Ui_mainWindow):
                                                        QMessageBox.Yes | QMessageBox.No, QMessageBox.No))
                         else:
                             kucunshuliang = self.query2.value(0)
-                            print(kucunshuliang)
+                            #print(kucunshuliang)
                             flag = True
-                            logging.info("%s消费 %s" % (self.cust_name.text(), fin))
+                            logging.info("%s消费 %s" % (self.cust_name.text().strip, fin))
                 if flag:
                     #self.query.exec_("update 员工 set 时间 = '%s',记录='%s',金额='%s' where 工号 ='%s'"% (now, log, fin,self.))
                     #更改商品信息
@@ -438,91 +460,112 @@ class reload_mainWin(QMainWindow,Ui_mainWindow):
             i=0
             while(i < self.showShoufa.rowCount()):
                 lines.append([self.showShoufa.cellWidget(i, 0), '手法', self.showShoufa.item(i, 1),
-                              self.showYaopin.cellWidget(i, 4),self.showYaopin.cellWidget(i, 5)])
+                              self.showShoufa.item(i, 4),self.showShoufa.cellWidget(i, 5)])
+               #print(self.showShoufa.item(i, 4).text())
                 i+=1
             for line in lines:
-                # 复选框、类别、名称、价格、数量
+                # 复选框、类别、名称、使用次数、剩余数量
                 if line[0].checkState() == Qt.Checked:
-                    print(line[2].text())
                     if line[1] == '手法':
                         # 复选框、类别、名称、次数、剩余次数
                         HandList.append(line)
 
                     if line[1] == '商品':
                         sum_Things += float(line[3].text()) * float(line[4].value())
-                        fin_Things = sum_Things
+                        log.append([line[2].text(),line[3].text(),line[4].value()]) #购买记录[[a,b,a],[c,d,v]] 名称、价格、数量
+                    logtemp.append([line[2].text(), line[3].text(), line[4].value()])
                     di[line[2].text()] = float(line[4].value())  # 加入已选的名称和数量 构成字典
-                    sum += float(line[3].text()) * float(line[4].value())
-                    log.append([line[2].text(),line[3].text(),line[4].value()]) #购买记录[[a,b,a],[c,d,v]] 名称、价格、数量
-            fin = sum
-            reply = QMessageBox.information(self, '提示', '消费金额%s' % fin, QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
+
+                    sum = sum_Things
+
+            reply = QMessageBox.information(self, '提示', '消费金额%s' %sum, QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
 
             if reply == QMessageBox.Yes:
                 for Hand_num in HandList:
                     # 复选框、类别、名称、次数、剩余次数
-                    print(Hand_num)
-                    if Hand_num[4] - Hand_num[3] < 0:
-                        print(QMessageBox.information(self, '提示', '%s剩余次数不足' %Hand_num[2], QMessageBox.Yes, QMessageBox.Yes))
+
+                    if int(Hand_num[3].text()) - int(Hand_num[4].value()) < 0:
+                        print(QMessageBox.information(self, '提示', '%s剩余次数不足' %Hand_num[2].text(), QMessageBox.Yes, QMessageBox.Yes))
                     else:
-                        Rest_num = Hand_num[4] - Hand_num[3]
-                        Hand_FinList.append([Hand_num[2],Rest_num])
+                        Rest_num = int(Hand_num[3].text()) - int(Hand_num[4].value())
+                        Hand_FinList.append([Hand_num[2].text(),Rest_num,int(Hand_num[4].value())]) #名称、数量
+
+                        flag2 = True
 
                 for name in di.keys():
-                    print(1)
+                    flag = False
                     self.query2.exec_("SELECT 库存数量 from things where 名称='%s'" % name)
                     while (self.query2.next()):
-                        print(2)
-                        if (float(self.query2.value(0)) - di[name] < 0):
+                        if not self.query2.value(0):
+                            print("没有数量")
+                            break
+                        elif float(self.query2.value(0)) - di[name] < 0:
                             print(QMessageBox.critical(self, '警告', '%s商品库存不足\n现有库存%s' % (name, self.query2.value(0)),
                                                        QMessageBox.Yes | QMessageBox.No, QMessageBox.No))
+                            break
                         else:
-                            self.query.exec_("SELECT 积分,药品可用金额 from 顾客 where 姓名 = '%s'" % self.cust_name.text())
+                            self.query.exec_("SELECT 积分,药品可用金额 from 顾客 where 姓名 = '%s'" % self.cust_name.text().strip())
                             while (self.query.next()):
-                                if float(self.query.value(1)) - float(fin_Things)<0:
+                                if float(self.query.value(1)) - float(sum)<0:
                                     print(QMessageBox.critical(self, '警告',
                                                                '%商品可用余额不足\n可用余额为%s' % (name, self.query2.value(1)),
                                                                QMessageBox.Yes, QMessageBox.Yes))
-                                #这里需要添加 手法次数的检测机制
-
+                                    break
                                 else:
-                                    jifen = float(self.query.value(0)) + float(fin_Things)
-                                    keyongThing = float(self.query.value(1)) - float(fin_Things)
-                                    print("药品%s-%s=%s" % (float(self.query.value(1)), float(fin_Things),float(self.query.value(1)) - float(fin_Things)))
+                                    jifen = float(self.query.value(0)) + float(sum)
+                                    keyongThing = float(self.query.value(1)) - float(sum)
+                                    print("药品%s-%s=%s" % (float(self.query.value(1)), float(sum),float(self.query.value(1)) - float(sum)))
                                     kucunshuliang = self.query2.value(0)
-                                    print(kucunshuliang)
+                                    print("库存数量",kucunshuliang)
                                     flag = True
-                                    logging.info("%s消费 %s" % (self.cust_name.text(), fin))
-                if flag:
+
+                if flag :
                     self.query.exec_("update 顾客 set 积分 = '%s',药品可用金额='%s' where 姓名 ='%s'"
-                                 % (jifen, keyongThing, self.cust_name.text()))
-                    text = "update 顾客 set 积分 = '%s',药品可用金额='%s' where 姓名 ='%s'"% (jifen, keyongThing, self.cust_name.text())
+                                 % (jifen, keyongThing, self.cust_name.text().strip()))
+                    text = "update 顾客 set 积分 = '%s',药品可用金额='%s' where 姓名 ='%s'"% (jifen, keyongThing, self.cust_name.text().strip())
                     logging.info(text)
+                    print(text)
                     #self.query.exec_("update 员工 set 时间 = '%s',记录='%s',金额='%s' where 工号 ='%s'"% (now, log, fin,self.))
                     #更改用户剩余手法次数
-                    for temp in Hand_FinList:
-                        self.query.exec_("update 顾客 set %s = '%s' where 姓名 ='%s'"
-                                         % (temp[0],temp[1],self.cust_name.text()))
-                        logging.info("update 顾客 set %s = '%s' where 姓名 ='%s'"%(temp[0],temp[1],self.cust_name.text()))
 
                     #更改商品信息
                     self.query2.exec_("update things set 库存数量 = '%s' where 名称 ='%s'"
                                       % (float(kucunshuliang) - di[name], name))
                     text = "update things set 库存数量 = '%s' where 名称 ='%s'"% (float(kucunshuliang) - di[name], name)
                     logging.info(text)
+
+                if flag2:
+                    for temp in Hand_FinList:
+                        self.query.exec_("update 顾客 set %s = '%s' where 姓名 ='%s' or 电话='%s'"
+                                         % (temp[0],temp[1],self.cust_name.text().strip(),self.cust_phone.text().strip()))
+                        logging.info("update 顾客 set %s = '%s' where 姓名 ='%s'"%(temp[0],temp[1],self.cust_name.text()))
+
+                    #print(self.cust_name.text().strip(),self.cust_phone.text().strip(),log, sum,keyongThing,Hand_FinList)
+
+               # print("loks",log,Hand_FinList)
+                if flag or flag2:
                     # 提交到log数据表
-                    if self.cust_name.text():
+                    if self.cust_name.text().strip():
                         self.query.exec_(
                             'insert into log(顾客姓名,购买记录,购买时间,工号,金额) values("%s","%s","%s","%s","%s")'
-                            % (self.cust_name.text(), log, now, self.lineEdit_2.text(), fin))
-                        text ='insert into log(顾客姓名,购买记录,购买时间,工号,金额) values("%s","%s","%s","%s","%s")'% (self.cust_name.text(), log, now, self.lineEdit_2.text(), fin)
-                        logging.info(text)
-                    elif self.cust_phone.text():
-                        self.query.exec_('insert into log(电话,购买记录,购买时间,工号,金额)values("%s","%s","%s","%s","%s")'
-                                         % (self.cust_phone.text(), log, now, self.lineEdit_2.text(),fin))
-                        text = "insert into log(电话,购买记录,购买时间,工号,金额) values('%s','%s','%s','%s','%s')"% (self.cust_phone.text(), log, now, self.lineEdit_2.text(),fin)
-                        logging.info(text)
-                    Printmain(log, fin,keyongThing,Hand_FinList)  # 打印小票信息
+                            % (self.cust_name.text().strip(), logtemp, now, self.lineEdit_2.text().strip(), sum))
+                        text = 'insert into log(顾客姓名,购买记录,购买时间,工号,金额) values("%s","%s","%s","%s","%s")' % (
+                            self.cust_name.text().strip(), logtemp, now, self.lineEdit_2.text().strip(), sum)
 
+                        logging.info(text)
+                    elif self.cust_phone.text().strip():
+                        self.query.exec_('insert into log(电话,购买记录,购买时间,工号,金额)values("%s","%s","%s","%s","%s")'
+                                         % (
+                                             self.cust_phone.text().strip(), logtemp, now,
+                                             self.lineEdit_2.text().strip(),
+                                             sum))
+                        text = "insert into log(电话,购买记录,购买时间,工号,金额) values('%s','%s','%s','%s','%s')" % (
+                            self.cust_phone.text().strip(), logtemp, now, self.lineEdit_2.text().strip(), sum)
+                        logging.info(text)
+                    #Printmain(self.cust_name.text().strip(),self.cust_phone.text().strip(),log, sum,keyongThing,Hand_FinList)  # 打印小票信息
+                self.showShoufa.clear()
+                self.showYaopin.clear()
+                self.db.close()
         else:
             print(QMessageBox.information(self, '提示', '请输入员工工号', QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes))
         self.db.close()

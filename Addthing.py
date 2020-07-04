@@ -9,11 +9,11 @@ class addThing(QWidget,Ui_Form):
         self.add_thing.clicked.connect(self.emitSingal)
 
     def emitSingal(self):
-        name = self.add_thing_name.text()
+        name = self.add_thing_name.text().strip()
         kind = self.comboBox.currentText()
         price = self.doubleSpinBox.value()
         num = self.spinBox.value()
-        beizhu = self.lineEdit.text()
+        beizhu = self.lineEdit.text().strip()
         lis =[name,kind,price,num,beizhu]
         self.Signal_FivesParameter[list].emit(lis)
 

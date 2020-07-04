@@ -111,7 +111,7 @@
            <string>搜索</string>
           </property>
           <property name="icon">
-           <iconset resource="../images/image.qrc">
+           <iconset>
             <normaloff>:/pic/search.ico</normaloff>:/pic/search.ico</iconset>
           </property>
          </widget>
@@ -232,13 +232,6 @@
            </size>
           </property>
          </spacer>
-        </item>
-        <item>
-         <widget class="Line" name="line_3">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-         </widget>
         </item>
         <item>
          <spacer name="horizontalSpacer_4">
@@ -383,11 +376,13 @@
     <addaction name="add_things"/>
     <addaction name="action_3"/>
     <addaction name="action_4"/>
+    <addaction name="action_6"/>
    </widget>
    <widget class="QMenu" name="menu_3">
     <property name="title">
      <string>数据</string>
     </property>
+    <addaction name="action_5"/>
     <addaction name="my_people"/>
     <addaction name="look_Cust"/>
    </widget>
@@ -415,7 +410,7 @@
   </action>
   <action name="print_things">
    <property name="icon">
-    <iconset resource="../images/image.qrc">
+    <iconset>
      <normaloff>:/pic/print.ico</normaloff>:/pic/print.ico</iconset>
    </property>
    <property name="text">
@@ -468,6 +463,16 @@
   <action name="action_4">
    <property name="text">
     <string>充值商品金额</string>
+   </property>
+  </action>
+  <action name="action_5">
+   <property name="text">
+    <string>今日寿星</string>
+   </property>
+  </action>
+  <action name="action_6">
+   <property name="text">
+    <string>充值积分</string>
    </property>
   </action>
  </widget>

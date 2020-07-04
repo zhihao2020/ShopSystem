@@ -11,7 +11,7 @@ class lookCustData(QWidget,Ui_Form):
         super(lookCustData, self).__init__()
         self.setupUi(self)
         self.db = QSqlDatabase.addDatabase('QSQLITE', "db3")
-        self.db.setDatabaseName('../data/all.db')
+        self.db.setDatabaseName('data/all.db')
         self.db.open()
         self.query = QSqlQuery(self.db)
         self.lineEdit.textChanged.connect(self.showInfo)

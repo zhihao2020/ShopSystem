@@ -12,12 +12,12 @@ class ChangePrice(QWidget,Ui_Form):
         self.row = row
 
     def emitSingal(self):
-        if float(self.lineEdit.text()) > 1:
+        if float(self.lineEdit.text().strip()) > 1:
             print(QMessageBox.critical(self, "警告", "折扣应该小于1", QMessageBox.Yes))
-        elif float(self.lineEdit.text()) < 0:
+        elif float(self.lineEdit.text().strip()) < 0:
             print(QMessageBox.critical(self, "警告", "折扣应该大于0", QMessageBox.Yes))
         else:
-            price = str(float(self.price) * float(self.lineEdit.text()))[0:5]
+            price = str(float(self.price) * float(self.lineEdit.text().strip()))[0:5]
             lis =[price,self.row]
             self.Signal_TwoParameter[list].emit(lis)
             self.close()

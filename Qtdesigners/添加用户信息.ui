@@ -48,7 +48,14 @@
         </widget>
        </item>
        <item row="0" column="3">
-        <widget class="QLineEdit" name="add_thing_name"/>
+        <widget class="QLineEdit" name="add_thing_name">
+         <property name="font">
+          <font>
+           <family>SimSun-ExtB</family>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+        </widget>
        </item>
        <item row="2" column="0">
         <widget class="QLabel" name="label_4">
@@ -65,6 +72,9 @@
            <height>0</height>
           </size>
          </property>
+         <property name="displayFormat">
+          <string>yyyy/MM/dd</string>
+         </property>
         </widget>
        </item>
        <item row="3" column="0">
@@ -75,7 +85,14 @@
         </widget>
        </item>
        <item row="2" column="3">
-        <widget class="QLineEdit" name="lineEdit"/>
+        <widget class="QLineEdit" name="lineEdit">
+         <property name="font">
+          <font>
+           <family>SimSun-ExtB</family>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+        </widget>
        </item>
        <item row="3" column="1">
         <spacer name="horizontalSpacer">

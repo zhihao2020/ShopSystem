@@ -1,7 +1,7 @@
 from UI.add.addpeopleMoney import Ui_Form
 from PyQt5.QtWidgets import QWidget
 from PyQt5.QtCore import pyqtSignal
-from UI.add.AddThings import Ui_Form
+from UI.add.addpeopleMoney import Ui_Form
 
 class addMoney(QWidget,Ui_Form):
     Signal_ThreeParameter = pyqtSignal(list)
