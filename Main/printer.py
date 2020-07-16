@@ -4,10 +4,11 @@ import logging
 import textwrap
 from PyQt5.QtWidgets import QMessageBox
 class Printer:
-    #使用的打印机 名称
-    PRINTER_NAME = "Blu-ray-58"
-    LINE_WIDTH = 40
-    lines = []
+    def __init__(self):
+        #使用的打印机 名称
+        self.PRINTER_NAME = "Blu-ray-58"
+        self.LINE_WIDTH = 40
+        self.lines = []
     def wrap(self, data, width=None):
         if data == "":
             return " "
@@ -27,9 +28,8 @@ class Printer:
         try:
             hPrinter = win32print.OpenPrinter(self.PRINTER_NAME)
         except:
-            #QMessageBox.information(self,"提示","没有连接打印机 或 没有配置打印机",QMessageBox.Yes)
+
             logging.error("没有连接打印机 或 没有配置打印机")
-            pass
         try:
             win32print.StartDocPrinter(hPrinter, 1, ("Notification", None, "RAW"))
             try:

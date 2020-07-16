@@ -15,6 +15,7 @@ class addThing(QWidget,Ui_Form):
         num = self.spinBox.value()
         beizhu = self.lineEdit.text().strip()
         lis =[name,kind,price,num,beizhu]
+
         self.Signal_FivesParameter[list].emit(lis)
 
 

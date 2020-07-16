@@ -15,5 +15,6 @@ class addShouNum(QWidget,Ui_Form):
         shouName= self.comboBox.currentText()
         num = self.spinBox_2.value()
         lis =[name,phone,shouName,num]
+        self.spinBox_2.setValue(0)
         self.Signal_FourParameter[list].emit(lis)
 

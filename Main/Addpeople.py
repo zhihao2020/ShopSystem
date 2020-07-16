@@ -13,7 +13,8 @@ class addPeople(QWidget,Ui_Form):
         year = self.spinBox.value()
         dianhua = self.lineEdit.text()
         birthDay = self.dateEdit.text()
-        print(birthDay)
+        self.add_thing_name.setText("")
+        self.lineEdit.setText("")
         lis =[name,year,dianhua,birthDay]
         self.Signal_FourParameter[list].emit(lis)
 

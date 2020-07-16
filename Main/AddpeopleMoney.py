@@ -15,6 +15,7 @@ class addMoney(QWidget,Ui_Form):
         phone =self.lineEdit.text()
         money = self.doubleSpinBox.value()
         lis =[name,phone,money]
+        self.doubleSpinBox.setValue(0)
         self.Signal_ThreeParameter[list].emit(lis)
 
 

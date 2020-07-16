@@ -91,6 +91,13 @@
        </layout>
       </item>
       <item>
+       <widget class="QLabel" name="label_5">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item>
        <layout class="QHBoxLayout" name="horizontalLayout_4">
         <item>
          <spacer name="horizontalSpacer_5">
@@ -367,6 +374,7 @@
      <string>文件</string>
     </property>
     <addaction name="refreash"/>
+    <addaction name="action_7"/>
    </widget>
    <widget class="QMenu" name="menu_2">
     <property name="title">
@@ -473,6 +481,11 @@
   <action name="action_6">
    <property name="text">
     <string>充值积分</string>
+   </property>
+  </action>
+  <action name="action_7">
+   <property name="text">
+    <string>清空</string>
    </property>
   </action>
  </widget>

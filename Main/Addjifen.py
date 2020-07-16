@@ -29,12 +29,18 @@ class AddJifenData(QWidget,Ui_Form):
                 print(num)
                 finNum = float(num) + float(self.spinBox.value())
                 cursor.execute("update 顾客 set 积分 = '%s' where 姓名 ='%s'"%(finNum,self.lineEdit.text().strip()) )
+                self.spinBox_2.value=0
+                self.add_thing_name.setText("")
+                self.lineEdit.setText("")
                 conn.commit()
             elif self.lineEdit_2.text().strip() in self.phone:
                 cursor.execute("SELECT 积分 FROM 顾客 WHERE 电话='%s'" % self.lineEdit_2.text().strip())
                 num = cursor.fetchone()[0]
                 finNum = float(num) + float(self.spinBox.value())
                 cursor.execute("update 顾客 set 积分 = '%s' where 电话 ='%s'" % (finNum, self.lineEdit_2.text().strip()))
+                self.spinBox_2.value = 0
+                self.add_thing_name.setText("")
+                self.lineEdit.setText("")
                 conn.commit()
             else:
                 print(QMessageBox.information(self,"提示","用户不存在",QMessageBox.Yes))

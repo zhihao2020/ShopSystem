@@ -45,6 +45,7 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
         self.action_3.triggered.connect(self.init_addUserShouNum)
         self.action_2.triggered.connect(self.addPeople_init)
         self.action_6.triggered.connect(self.add_Jifen)
+        self.action_7.triggered.connect(self.clear_name_phone)
         self.action.triggered.connect(self.about)
         # 按钮
         self.pushButton_2.clicked.connect(self.jiesuan)
@@ -66,6 +67,9 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
         self.query = QSqlQuery(self.db)
         self.query2 = QSqlQuery(self.db)
         self.query3 = QSqlQuery(self.db)
+
+    def clear_name_phone(self):
+        self.cust_phone.setText(" ") and self.cust_name.setText(" ")
 
     def about(self):
         webbrowser.open_new_tab('https://zhihao2020.github.io/about/')
@@ -110,7 +114,7 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
                 pass
         elif self.index == 1:
             try:
-                items = self.showShoufa.findItems(self.thing_name.text().strip(), QtCore.Qt.MatchExactly)
+                items = self.showShoufa.findItems(self.thing_name.text().strip(), QtCore.Qt.MatchContains)
                 item = items[0]
                 # 选中单元格
                 item.setSelected(True)
@@ -128,7 +132,6 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
         self.handList = []
         self.showThings()
         self.showThings2()
-        self.connect_LCD()
 
     def get_Row(self, kind):
         n = 0
@@ -255,6 +258,7 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
                                 cursor.execute("update things set 价格='%s',库存数量='%s' where 名称='%s'" % (lis[2], num, lis[0]))
                                 text = "update things set 价格='%s',库存数量='%s' where 名称='%s'" % (lis[2], num, lis[0])
                                 logging.info('修改商品----%s' % text)
+
                                 conn.commit()
                         else:
                             cursor.execute("update things set 库存数量='%s' where 名称='%s'" % (num, lis[0]))
@@ -268,11 +272,11 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
                         try:
                             cursor.execute("insert into things(名称,类别,价格,备注) values('%s','%s','%s','%s')" % (
                                 lis[0], lis[1], lis[2], lis[4]))
-                            cursor.execute("alter table 顾客 add %s int;" % (lis[0]))
-                            text = "alter table 顾客 add %s int;" % (lis[0])
+                            text = "alter table 顾客 add '%s' int" % (lis[0])
                             print(text)
+                            cursor.execute("alter table 顾客 add '%s' int" % (lis[0]))
                             conn.commit()
-                        except:
+                        except :
                             print(QMessageBox.critical(self, "警告", '添加错误\n错误代码:4543', QMessageBox.Yes))
                         else:
                             print(QMessageBox.information(self, "提示", '添加成功', QMessageBox.Yes))
@@ -418,23 +422,24 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
                         initNum = 0
 
                     Num = initNum + int(lis[3])
-                    cursor.execute("update 顾客 set %s='%s' where 姓名='%s'" % (lis[2], Num, lis[0]))
-                    conn.commit()
-                    text = "update 顾客 set %s='%s' where 姓名='%s'" % (lis[2], Num, lis[0])
+                   
+                    text = "update 顾客 set '%s'='%s' where 姓名='%s'" % (lis[2], Num, lis[0])
                     print(text)
+                    cursor.execute("update 顾客 set '%s'='%s' where 姓名='%s'" % (lis[2], Num, lis[0]))
+                    conn.commit()
+
             elif lis[1] in phone:
                 reply = QMessageBox.information(self, '提示', '对用户 %s\n充值:%s'%(lis[1],lis[2]), QMessageBox.Yes)
                 if reply == QMessageBox.Yes:
                     cursor.execute("select %s from 顾客 where 电话='%s' " % (lis[2], lis[1]))
                     initNum = cursor.fetchone()[0]
-
                     if not initNum:
                         initNum = 0
 
                     Num = initNum + int(lis[3])
-                    cursor.execute("update 顾客 set %s='%s' where 电话='%s'" % (lis[2], Num, lis[1]))
+                    cursor.execute("update 顾客 set '%s'='%s' where 电话='%s'" % (lis[2], Num, lis[1]))
                     conn.commit()
-                    text = "update 顾客 set %s='%s' where 电话='%s'" % (lis[2], Num, lis[1])
+                    text = "update 顾客 set '%s'='%s' where 电话='%s'" % (lis[2], Num, lis[1])
                     print(text)
             else:
                 QMessageBox.information(self, '提示', '该用户不存在', QMessageBox.Yes)
@@ -455,19 +460,37 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
         self.lookCust_Data.show()
 
     def connect_LCD(self):
-        self.openDB()
         try:
-            if self.cust_name.text().strip():
-                MONERY = "SELECT 药品可用金额,积分 from 顾客 where 姓名 = '%s'" % (self.cust_name.text().strip())
+            conn = sqlite3.connect("data/all.db")
+            cursor = conn.cursor()
+            tempflag = False
+            if self.cust_name.text().strip() != "":
+                MONERY = "SELECT 药品可用金额,积分,电话 from 顾客 where 姓名 = '%s'" % (self.cust_name.text().strip())
+                tempflag = True
             else:
-                MONERY = "SELECT 药品可用金额,积分 from 顾客 where 电话=%s" % (self.cust_phone.text().strip())
-            self.query.exec_(MONERY)
-            while (self.query.next()):
-                self.money_vaild_2.display(self.query.value(0))
-                self.jifen.display(self.query.value(1))
+                MONERY = "SELECT 药品可用金额,积分,姓名 from 顾客 where 电话='%s'" % (self.cust_phone.text().strip())
+            cursor.execute(MONERY)
+            print(MONERY)
+            tempList = cursor.fetchone()
+            print(tempList[0])
+            print(tempList[1])
+
+            self.money_vaild_2.display(tempList[0])
+            self.jifen.display(tempList[1])
+            if tempflag:
+                self.label_5.setText("电话："+tempList[2])
+            else:
+                self.label_5.setText("姓名："+tempList[2])
+            testList = cursor.fetchall()
+            if testList:
+                tempStr = ""
+                for n in testList:
+                    tempStr += n[2] +"\n"
+                QMessageBox.warning(self,"提示","与用户%s \n发生冲突"%tempStr)
         except:
-            pass
-        self.db.close()
+            conn.rollback()
+        finally:
+            conn.close()
 
     def jiesuan(self, name):
         self.openDB()
@@ -525,9 +548,12 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
                     text = "update things set 库存数量 = '%s' where 名称 ='%s'" % (float(kucunshuliang) - di[name], name)
                     logging.info(text)
                     # 提交到log数据表
-                    Printmain(log, fin)  # 打印小票信息
+
+                    Printmain(data=log,fin=fin)  # 打印小票信息
+            self.db.close()
 
         elif self.lineEdit_2.text():
+            self.openDB()
             i = 0
             while (i < self.showYaopin.rowCount()):
                 # 复选框、类别、名称、价格、数量
@@ -637,6 +663,7 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
                 #获取uid 并 改进 log
                 try:
                     logging.info("-----进入结算------")
+                    print("-----进入结算------")
                     conn = sqlite3.connect("data/all.db")
                     cursor = conn.cursor()
 
@@ -651,7 +678,7 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
                             # 更改商品信息
                             cursor.execute("update things set 库存数量 = '%s' where 名称 ='%s'"
                                               % (float(kucunshuliang) - di[name], name))
-                            conn.commit()
+                            #conn.commit()
                             text2 = "update things set 库存数量 = '%s' where 名称 ='%s'" % (float(kucunshuliang) - di[name], name)
                             logging.info(text2)
                         else:
@@ -664,12 +691,12 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
                             # 更改商品信息
                             cursor.execute("update things set 库存数量 = '%s' where 名称 ='%s'"
                                            % (float(kucunshuliang) - di[name], name))
-                            conn.commit()
+                            #conn.commit()
                             text2 = "update things set 库存数量 = '%s' where 名称 ='%s'" % (
                             float(kucunshuliang) - di[name], name)
                             logging.info(text2)
 
-                    elif flag2:
+                    if flag2:
                         if self.cust_name.text().strip():
                             for temp in Hand_FinList:
                                 print(temp)
@@ -678,7 +705,7 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
                                 cursor.execute("update 顾客 set %s = '%s' where 姓名 ='%s'"% (temp[0], temp[1],self.cust_name.text()))
                                 text3 = "update 顾客 set %s = '%s' where 姓名 ='%s'" % (temp[0], temp[1], self.cust_name.text())
                                 logging.info(text3)
-                            conn.commit()
+                            #conn.commit()
                         else:
                             for temp in Hand_FinList:
                                 print(temp)
@@ -690,10 +717,10 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
                                 text3 = "update 顾客 set %s = '%s' where 电话 ='%s'" % (
                                 temp[0], temp[1], self.cust_phone.text())
                                 logging.info(text3)
-                            conn.commit()
+                            #conn.commit()
 
 
-                    elif flag or flag2:
+                    if flag or flag2:
                         # 提交到log数据表
                         if self.cust_name.text().strip():
                             cursor.execute(
@@ -709,15 +736,16 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
                                                  self.cust_phone.text().strip(), logtemp, now,
                                                  self.lineEdit_2.text().strip(),
                                                  sum))
-                            conn.commit()
+                            #conn.commit()
                             text5 = "insert into log(电话,购买记录,购买时间,工号,金额) values('%s','%s','%s','%s','%s')" % (
                                 self.cust_phone.text().strip(), logtemp, now, self.lineEdit_2.text().strip(), sum)
                             logging.info(text5)
-                        print(self.cust_name.text().strip(), self.cust_phone.text().strip(), log, sum, keyongThing,Hand_FinList)
-                        Printmain(self.cust_name.text().strip(), self.cust_phone.text().strip(), log, sum, keyongThing,Hand_FinList)  # 打印小票信息
 
-                    else:
-                        QMessageBox.warning(self,"提醒","未进入结算环节\n请检查用户姓名或电话号码",QMessageBox.Yes)
+                        print("打印")
+                        print(self.cust_name.text().strip(), self.cust_phone.text().strip(), log, sum, keyongThing,Hand_FinList)
+                        Printmain(name = self.cust_name.text().strip(), phone = self.cust_phone.text().strip(), data=log, fin=sum, keyongThing=keyongThing,Hand_FinList=Hand_FinList)  # 打印小票信息
+
+
                 except IOError:
                     QMessageBox.critical(self,"警告","检查数据库连接\n并与管理员联系\n错误代码:3456",QMessageBox.Yes)
                     conn.rollback()
@@ -731,10 +759,10 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
                     conn.rollback()
                     logging.info("-----以上消息失效------")
                 except:
-                    QMessageBox.critical(self, "警告", "错误代码:3459\n请与管理员联系",QMessageBox.Yes)
+                    QMessageBox.critical(self, "警告", "错误代码:3459\n请与管理员联系", QMessageBox.Yes)
                     conn.rollback()
                     logging.info("-----以上消息失效------")
-
+                else:conn.commit()
                 finally:
                     conn.close()
                     #初始化
