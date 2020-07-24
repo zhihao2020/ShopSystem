@@ -10,7 +10,7 @@ from Addpeople import addPeople
 from Addthing import addThing
 from AddpeopleMoney import addMoney
 from ChangeZhekou import ChangePrice
-from customerData import lookCustData
+from customerData import DataGrid
 from Addjifen import AddJifenData
 from addpeopleNum import addShouNum
 import datetime
@@ -456,7 +456,7 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
             conn.close()
 
     def lookCust(self):
-        self.lookCust_Data = lookCustData()
+        self.lookCust_Data = DataGrid()
         self.lookCust_Data.show()
 
     def connect_LCD(self):
@@ -523,7 +523,7 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
                         sum_Things += float(line[3].text()) * float(line[4].value())
 
                     di[line[2].text()] = float(line[4].value())  # 加入已选的名称和数量 构成字典
-                    logtemp.append([line[2].text(), line[4].value()]) # 名称 单价 数量
+                    logtemp.append(["商品\手法名称:%s"%line[2].text(), "使用次数\个数：%s"%line[4].value()]) # 名称  数量
                     log.append([line[2].text(), line[3].text(), line[4].value()])  # 购买记录[[a,b,a],[c,d,v]] 名称、价格、数量
             fin = sum_Things
             reply = QMessageBox.information(self, '提示', '消费金额%s' % fin, QMessageBox.Yes | QMessageBox.No,
@@ -577,7 +577,7 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
                     if line[1] == '商品':
                         sum_Things += float(line[3].text()) * float(line[4].value())
                         log.append([line[2].text(), line[3].text(), line[4].value()])  # 购买记录[[a,b,a],[c,d,v]] 名称、价格、数量
-                    logtemp.append([line[2].text(), line[4].value()])
+                    logtemp.append(["商品\手法名称：%s"%line[2].text(), "使用次数\个数:%s"%line[4].value()])
                     di[line[2].text()] = float(line[4].value())  # 加入已选的名称和数量 构成字典
 
                     sum = sum_Things

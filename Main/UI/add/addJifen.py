@@ -27,6 +27,7 @@ class Ui_Form(object):
         self.gridLayout.addWidget(self.label_2, 2, 0, 1, 1)
         self.spinBox = QtWidgets.QSpinBox(Form)
         self.spinBox.setMaximum(999999999)
+        self.spinBox.setMinimum(-9999999)
         self.spinBox.setObjectName("spinBox")
         self.gridLayout.addWidget(self.spinBox, 2, 2, 1, 1)
         self.lineEdit = QtWidgets.QLineEdit(Form)

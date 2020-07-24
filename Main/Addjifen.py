@@ -29,8 +29,8 @@ class AddJifenData(QWidget,Ui_Form):
                 print(num)
                 finNum = float(num) + float(self.spinBox.value())
                 cursor.execute("update 顾客 set 积分 = '%s' where 姓名 ='%s'"%(finNum,self.lineEdit.text().strip()) )
-                self.spinBox_2.value=0
-                self.add_thing_name.setText("")
+                self.spinBox.setValue = 0
+
                 self.lineEdit.setText("")
                 conn.commit()
             elif self.lineEdit_2.text().strip() in self.phone:
@@ -38,8 +38,8 @@ class AddJifenData(QWidget,Ui_Form):
                 num = cursor.fetchone()[0]
                 finNum = float(num) + float(self.spinBox.value())
                 cursor.execute("update 顾客 set 积分 = '%s' where 电话 ='%s'" % (finNum, self.lineEdit_2.text().strip()))
-                self.spinBox_2.value = 0
-                self.add_thing_name.setText("")
+                self.spinBox.value = 0
+                self.spinBox.setValue = 0
                 self.lineEdit.setText("")
                 conn.commit()
             else:

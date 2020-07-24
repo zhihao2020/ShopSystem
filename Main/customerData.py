@@ -1,44 +1,13 @@
 from PyQt5.QtWidgets import *
+from PyQt5.QtSql import QSqlDatabase, QSqlQueryModel
 from PyQt5.QtCore import Qt
-from UI.lookCust import Ui_Form
-from PyQt5.QtGui import QStandardItemModel
-from PyQt5.QtSql import QSqlDatabase,QSqlQuery,QSqlTableModel
-import datetime
-
-class lookCustData(QWidget,Ui_Form):
-    def __init__(self):
-        super(lookCustData, self).__init__()
-        self.setupUi(self)
-        self.db = QSqlDatabase.addDatabase('QSQLITE', "db3")
-        self.db.setDatabaseName('data/all.db')
-        self.db.open()
-        self.query = QSqlQuery(self.db)
-        self.lineEdit.textChanged.connect(self.showInfo)
-        self.lineEdit_3.textChanged.connect(self.showInfo)
-        self.lineEdit_4.textChanged.connect(self.find_Thing)
-
-    def initializeModel(self):
-        model = QSqlTableModel()
-        model.setTable("顾客")
-        model.select()
-        model.setHeaderData(0,Qt.Horizontal,"顾客姓名")
-        model.setHeaderData(1,Qt.Horizontal,"顾客电话")
-        model.setHeaderData(2,Qt.Horizontal,"购买日期")
-        model.setHeaderData(3,Qt.Horizontal,"购买记录")
-        model.setHeaderData(4,Qt.Horizontal,"消费商品金额")
-        model.setHeaderData(5,Qt.Horizontal,"工号")
-
-        view = self.tableView()
-        view.setModel(model)
-        view.setWindowTitle()
-        view.show()
-
-
+from PyQt5 import QtGui
+import re
 class DataGrid(QWidget):
 
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("分页查询例子")
+        self.setWindowTitle("用户")
         self.resize(750, 300)
 
         # 查询模型
@@ -64,7 +33,7 @@ class DataGrid(QWidget):
         # 总记录数
         self.totalRecrodCount = 0
         # 每页显示记录数
-        self.PageRecordCount = 5
+        self.PageRecordCount = 50
 
         self.db = None
         self.initUI()
@@ -79,9 +48,9 @@ class DataGrid(QWidget):
         self.prevButton.clicked.connect(self.onPrevButtonClick)
         self.nextButton.clicked.connect(self.onNextButtonClick)
         self.switchPageButton.clicked.connect(self.onSwitchPageButtonClick)
+        self.tableView.setWordWrap(True)
 
-    def closeEvent(self, event):
-        # 关闭数据库
+    def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
         self.db.close()
 
     # 创建窗口
@@ -123,13 +92,13 @@ class DataGrid(QWidget):
         self.tableView = QTableView()
         # 表格宽度的自适应调整
         self.tableView.horizontalHeader().setStretchLastSection(True)
-        self.tableView.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.tableView.horizontalHeader().setSectionResizeMode(QHeaderView.Interactive)
 
         # 创建界面
-        mainLayout = QVBoxLayout(self);
-        mainLayout.addLayout(operatorLayout);
-        mainLayout.addWidget(self.tableView);
-        mainLayout.addLayout(statusLayout);
+        mainLayout = QVBoxLayout(self)
+        mainLayout.addLayout(operatorLayout)
+        mainLayout.addWidget(self.tableView)
+        mainLayout.addLayout(statusLayout)
         self.setLayout(mainLayout)
 
     # 设置表格
@@ -137,14 +106,14 @@ class DataGrid(QWidget):
         print('*** step2 SetTableView')
         self.db = QSqlDatabase.addDatabase('QSQLITE')
         # 设置数据库名称
-        self.db.setDatabaseName('./db/database.db')
+        self.db.setDatabaseName('data/all.db')
         # 打开数据库
         self.db.open()
 
         # 声明查询模型
         self.queryModel = QSqlQueryModel(self)
         # 设置当前页
-        self.currentPage = 1;
+        self.currentPage = 1
         # 得到总记录数
         self.totalRecrodCount = self.getTotalRecordCount()
         # 得到总页数
@@ -165,15 +134,17 @@ class DataGrid(QWidget):
         print('totalPage=' + str(self.totalPage))
 
         # 设置表格表头
-        self.queryModel.setHeaderData(0, Qt.Horizontal, "编号")
-        self.queryModel.setHeaderData(1, Qt.Horizontal, "姓名")
-        self.queryModel.setHeaderData(2, Qt.Horizontal, "性别")
-        self.queryModel.setHeaderData(3, Qt.Horizontal, "年龄")
-        self.queryModel.setHeaderData(4, Qt.Horizontal, "院系")
+        self.queryModel.setHeaderData(0, Qt.Horizontal, "姓名")
+        self.queryModel.setHeaderData(1, Qt.Horizontal, "电话")
+        self.queryModel.setHeaderData(2, Qt.Horizontal, "购买记录")
+        self.queryModel.setHeaderData(3, Qt.Horizontal, "购买时间")
+        self.queryModel.setHeaderData(4, Qt.Horizontal, "员工工号")
+        self.queryModel.setHeaderData(5, Qt.Horizontal, "消费商品金额")
+        self.tableView.setWordWrap(True)
 
     # 得到记录数
     def getTotalRecordCount(self):
-        self.queryModel.setQuery("select * from student")
+        self.queryModel.setQuery("select 顾客姓名,电话,购买记录,购买时间,工号,金额 from log")
         rowCount = self.queryModel.rowCount()
         print('rowCount=' + str(rowCount))
         return rowCount
@@ -187,7 +158,7 @@ class DataGrid(QWidget):
 
     # 记录查询
     def recordQuery(self, limitIndex):
-        szQuery = ("select * from student limit %d,%d" % (limitIndex, self.PageRecordCount))
+        szQuery = ("select 顾客姓名,电话,购买记录,购买时间,工号,金额 from log limit %d,%d" % (limitIndex, self.PageRecordCount))
         print('query sql=' + szQuery)
         self.queryModel.setQuery(szQuery)
 
@@ -200,7 +171,7 @@ class DataGrid(QWidget):
         if self.currentPage == 1:
             self.prevButton.setEnabled(False)
             self.nextButton.setEnabled(True)
-        elif self.currentPage == self.totalPage:
+        elif self.currentPage >= int(self.totalPage):
             self.prevButton.setEnabled(True)
             self.nextButton.setEnabled(False)
         else:
@@ -220,7 +191,7 @@ class DataGrid(QWidget):
 
     # 前一页按钮按下
     def onPrevButtonClick(self):
-        print('*** onPrevButtonClick ');
+        print('*** onPrevButtonClick ')
         limitIndex = (self.currentPage - 2) * self.PageRecordCount
         self.recordQuery(limitIndex)
         self.currentPage -= 1
@@ -228,7 +199,7 @@ class DataGrid(QWidget):
 
     # 后一页按钮按下
     def onNextButtonClick(self):
-        print('*** onNextButtonClick ');
+        print('*** onNextButtonClick ')
         limitIndex = self.currentPage * self.PageRecordCount
         self.recordQuery(limitIndex)
         self.currentPage += 1
@@ -254,11 +225,10 @@ class DataGrid(QWidget):
 
         # 得到页数
         pageIndex = int(szText)
+
         # 判断是否有指定页
         if pageIndex > self.totalPage or pageIndex < 1:
-            QMessageBox.information(self, "提示", "没有指定的页面，请重新输入")
-            return
-
+            return QMessageBox.information(self, "提示", "没有指定的页面，请重新输入")
         # 得到查询起始行号
         limitIndex = (pageIndex - 1) * self.PageRecordCount
 
@@ -268,5 +238,3 @@ class DataGrid(QWidget):
         self.currentPage = pageIndex
         # 刷新状态
         self.updateStatus()
-
-
