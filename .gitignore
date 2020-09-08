@@ -2,3 +2,6 @@ __pycache__/
 *.db
 .idea/
 ProgramLog.log
+build/
+dist/
+Start.spec

@@ -20,12 +20,12 @@ def Printmain(name=None,phone=None,data=None, fin=None, keyongThing=None, Hand_F
             p.add_line("剩余次数：" + str(temp[1]))
             p.add_line("         ")
     if data:
-        p.add_line("品名     数量   金额")
+        p.add_line("品名     金额   数量")
         for x in data:
             name_id = x[0]
-            price = x[1]
-            num = x[2]
-            p.add_line(name_id + '    ' + str(num) + '   ' + str(price))
+            price = x[2]
+            num = x[3]
+            p.add_line(name_id + '    ' + str(price) + '   ' + str(num))
         p.add_line("合计： " + str(fin))
         p.add_line("可用于购买商品的金额：" + str(keyongThing))
     p.add_line("**************")
@@ -50,12 +50,12 @@ def Printmain(name=None,phone=None,data=None, fin=None, keyongThing=None, Hand_F
             p.add_line("剩余次数：" + str(temp[1]))
             p.add_line("         ")
     if data:
-        p.add_line("品名     数量   金额")
+        p.add_line("品名     金额   数量")
         for x in data:
             name_id = x[0]
-            price = x[1]
-            num = x[2]
-            p.add_line(name_id + '    ' + str(num) + '   ' + str(price))
+            price = x[2]
+            num = x[3]
+            p.add_line(name_id + '    ' + str(price) + '   ' + str(num))
         p.add_line("合计： " + str(fin))
         p.add_line("可用于购买商品的金额：" + str(keyongThing))
     p.add_line("**************")

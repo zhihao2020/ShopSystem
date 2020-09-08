@@ -231,7 +231,7 @@ class Ui_mainWindow(object):
         self.retranslateUi(mainWindow)
         self.tabWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(mainWindow)
-
+        
     def retranslateUi(self, mainWindow):
         _translate = QtCore.QCoreApplication.translate
         mainWindow.setWindowTitle(_translate("mainWindow", "系统主界面"))
@@ -264,4 +264,5 @@ class Ui_mainWindow(object):
         self.action_5.setText(_translate("mainWindow", "今日寿星"))
         self.action_6.setText(_translate("mainWindow", "充值积分"))
         self.action_7.setText(_translate("mainWindow", "清空"))
+
 import image_rc
