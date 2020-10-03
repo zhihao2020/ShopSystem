@@ -27,7 +27,7 @@ def Printmain(name=None,phone=None,data=None, fin=None, keyongThing=None, Hand_F
             num = x[3]
             p.add_line(name_id + '    ' + str(price) + '   ' + str(num))
         p.add_line("合计： " + str(fin))
-        p.add_line("可用于购买商品的金额：" + str(keyongThing))
+        p.add_line("剩余可用于购买商品的金额：" + str(keyongThing))
     p.add_line("**************")
     p.add_line("欢迎光临，谢谢惠顾！")
     p.add_line("医琦母婴护理")
@@ -57,7 +57,7 @@ def Printmain(name=None,phone=None,data=None, fin=None, keyongThing=None, Hand_F
             num = x[3]
             p.add_line(name_id + '    ' + str(price) + '   ' + str(num))
         p.add_line("合计： " + str(fin))
-        p.add_line("可用于购买商品的金额：" + str(keyongThing))
+        p.add_line("剩余可用于购买商品的金额：" + str(keyongThing))
     p.add_line("**************")
     p.add_line("欢迎光临，谢谢惠顾！")
     p.add_line("医琦母婴护理")

@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtSql import QSqlDatabase, QSqlQuery
 from PyQt5.QtCore import Qt
-from PyQt5 import QtCore
+from PyQt5 import QtCore,QtGui
 import sys
 import webbrowser
 from pygame import mixer
@@ -16,6 +16,8 @@ from addpeopleNum import addShouNum
 import datetime
 import logging
 import sqlite3
+import cgitb
+import os
 from connectPrinter import Printmain
 
 logging.basicConfig(filename='ProgramLog.log', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s:')
@@ -29,7 +31,7 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
         self.handList = []
         self.init()
         self.birthDayMusic()
-
+        cgitb.enable(format='text')
     def init(self):
         # 连接数据库
         self.db = QSqlDatabase.addDatabase('QSQLITE', "db2")
@@ -86,7 +88,6 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
             mixer.music.play(loops=1, start=0.0)
             mixer.music.set_volume(1)
             QMessageBox.information(self, "提示", tempText, QMessageBox.Yes)
-
         self.db.close()
 
     def currentTab(self, index):
@@ -118,19 +119,18 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
                 # 选中单元格
                 item.setSelected(True)
                 row = item.row()
-                # 滚轮定位过去，快速定位到第17行
+                # 滚轮定位过去，快速定位
                 self.showShoufa.verticalScrollBar().setSliderPosition(row)
             except:
                 pass
 
-        # 刷新TabWidget
-
     def reFreash(self):
         # 重新刷新
-        self.ThingsList = []
-        self.handList = []
+        self.ThingsList.clear()
+        self.handList.clear()
         self.showThings()
         self.showThings2()
+        self.connect_LCD()
 
     def get_Row(self, kind):
         n = 0
@@ -144,12 +144,16 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
         # 目标是商品的数据库
         self.openDB()
         self.showYaopin.setColumnCount(6)
+        self.showYaopin.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.showYaopin.setRowCount(self.get_Row('商品'))
         self.showYaopin.setColumnWidth(0, 50)
         self.showYaopin.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.showYaopin.setHorizontalHeaderLabels(["", "名称", "单价", "备注", "库存数量", "数量"])
         self.showYaopin.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)  # 设置表格自适应
         self.showYaopin.itemDoubleClicked.connect(self.changPrize)
+        #self.showYaopin.resizeColumnsToContents()
+        #self.showYaopin.resizeRowsToContents()#行高适应内容
+        self.showYaopin.setSelectionBehavior(QAbstractItemView.SelectRows)
         i = 0
         self.query.exec_("SELECT 名称 from things where 类别='商品'")
         while (self.query.next()):
@@ -161,9 +165,14 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
                 for n in range(4):
                     # print("第",i,"行，","第",n,"列")
                     ck = QCheckBox()
-                    ck.setStyleSheet("QCheckBox::indicator { width: 35px; height: 35px;}")
+                    combox_Style="QCheckBox::indicator { width:32px; height: 32px;} " \
+                                 "QCheckBox::indicator::unchecked {image: url(%s/images/unchecked.png);}" \
+                                 "QCheckBox::indicator::checked {image: url(%s/images/checked.png);}"%(os.getcwd(),os.getcwd())
+                    combox_Style = combox_Style.replace("\\","/")
+                    ck.setStyleSheet(combox_Style)
                     Qs = QSpinBox()
                     newItem = QTableWidgetItem(str(self.query2.value(n)))
+                    newItem.setFont(QtGui.QFont("SimSun", 20))
                     # print(self.query2.value(n))
                     self.showYaopin.setCellWidget(i, 0, ck)
                     self.showYaopin.setItem(i, n + 1, newItem)
@@ -178,10 +187,10 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
         self.showShoufa.setColumnCount(6)
         self.showShoufa.setRowCount(self.get_Row('手法'))
         self.showShoufa.setEditTriggers(QAbstractItemView.NoEditTriggers)
-
         self.showShoufa.setHorizontalHeaderLabels(["", "名称", "非会员价格", "备注", "剩余次数", "次数"])
         self.showShoufa.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)  # 设置表格自适应
-
+       # self.showShoufa.resizeRowsToContents()  # 行高适应内容
+        self.showShoufa.setSelectionBehavior(QAbstractItemView.SelectRows)
         # self.showShoufa.itemDoubleClicked.connect(self.changPrize)
         i = 0
         self.query.exec_("SELECT 名称 from things where 类别='手法'")
@@ -193,10 +202,15 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
                 for n in range(3):
                     # print("第", i, "行，", "第", n, "列")
                     ck = QCheckBox()
-                    ck.setStyleSheet("QCheckBox::indicator { width: 35px; height: 35px;}")
+                    combox_Style = "QCheckBox::indicator { width:32px; height: 32px;} " \
+                                   "QCheckBox::indicator::unchecked {image: url(%s/images/unchecked.png);}" \
+                                   "QCheckBox::indicator::checked {image: url(%s/images/checked.png);}" % (
+                                   os.getcwd(), os.getcwd())
+                    combox_Style = combox_Style.replace("\\", "/")
+                    ck.setStyleSheet(combox_Style)
                     Qs = QSpinBox()
                     newItem = QTableWidgetItem(str(self.query2.value(n)))
-                    # print(self.query2.value(n))
+                    newItem.setFont(QtGui.QFont("SimSun", 20))
                     self.showShoufa.setCellWidget(i, 0, ck)
                     self.showShoufa.setItem(i, n + 1, newItem)
                     self.query3.exec_(
@@ -209,7 +223,6 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
                     littleFlag = True
                 if not littleFlag:
                     self.showShoufa.setItem(i, 4, QTableWidgetItem(" "))
-
             i += 1
         self.showShoufa.show()
         self.db.close()
@@ -492,10 +505,12 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
                     tempStr += n[2] + "\n"
                 QMessageBox.warning(self, "提示", "与用户%s \n发生冲突" % tempStr)
             self.showThings2()  # 触发手法
+            self.showThings()
         except TypeError:
             self.money_vaild_2.display(0)
             self.jifen.display(0)
             self.showThings2()  # 触发手法
+            self.showThings()
         except:
             conn.rollback()
             QMessageBox.critical(self, "警告", "错误代码：9898", QMessageBox.Yes)
@@ -582,7 +597,7 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
             sumThing, keyongThing = self.Check_money()
             jifen = float(self.jifen.value()) + float(sumThing)
         except IOError:
-            pass
+            return None
         except Exception as e:
             QMessageBox.warning(self, "警告", "%s\n错误代码：101" % e)
             logging.warning(e)
@@ -594,6 +609,7 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
 
     def Clearing_Shoufa(self):
         try:
+            show_name= ""
             Hand_FinList = []
             # 复选框、名称、剩余次数、使用次数
             for Hand_num in self.shoufa:
@@ -602,6 +618,10 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
                 else:
                     Rest_num = int(Hand_num[2].text()) - int(Hand_num[3].value())
                     Hand_FinList.append([Hand_num[1].text(), Rest_num,Hand_num[3].value()])  # 名称、数量
+                    show_name += Hand_num[1].text()+str(Hand_num[3].value())+"次\n"
+            reply = QMessageBox.information(self,"消费手法",show_name,QMessageBox.Yes,QMessageBox.No)
+            if reply != QMessageBox.Yes:
+                raise Exception("手法添加错误！")
         except Exception as e:
             QMessageBox.warning(self, "警告\n错误代码：74", "%s" % e, QMessageBox.Yes)
             logging.warning(e)
@@ -611,14 +631,12 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
 
     def Flow(self):
         self.Get_data()
-        Hand_FinList=[]
-        Thing=[]
-        sumThing = 0
         now = datetime.datetime.today().strftime('%d/%m/%Y')
         try:
-            if not self.lineEdit_2.text().strip():
-                raise("请输入工号")
             conn = sqlite3.connect("data/all.db")
+            if not self.lineEdit_2.text().strip():
+                raise Exception("请输入工号")
+
             cursor = conn.cursor()
             logging.info("-----进入结算------")
             jifen, keyongThing, Thing_FinList,sumThing = self.Clearing_Yaopin()
@@ -652,14 +670,15 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
             Hand_FinList = self.Clearing_Shoufa()
             if self.cust_name.text().strip():
                 for temp in Hand_FinList:
+                   # print("update 顾客 set '%s' = '%s' where 姓名 ='%s'" % (str(temp[0]), temp[1], self.cust_name.text()))
                     cursor.execute(
-                        "update 顾客 set %s = '%s' where 姓名 ='%s'" % (temp[0], temp[1], self.cust_name.text()))
+                        "update 顾客 set '%s' = '%s' where 姓名 ='%s'" % (str(temp[0]), temp[1], self.cust_name.text()))
                     text3 = "【修改用户信息】顾客 %s set %s='%s'" % (self.cust_name.text(), temp[0], temp[1])
                     logging.info(text3)
             elif self.cust_phone.text().strip():
                 for temp in Hand_FinList:
-                    cursor.execute("update 顾客 set %s = '%s' where 电话 ='%s'" % (
-                        temp[0], temp[1], self.cust_phone.text().strip()))
+                    cursor.execute("update 顾客 set '%s' = '%s' where 电话 ='%s'" % (
+                        str(temp[0]), temp[1], self.cust_phone.text().strip()))
                     text3 = "【修改用户信息】电话:%s %s=%s" % (self.cust_phone.text(), temp[0], temp[1])
                     logging.info(text3)
 
@@ -673,9 +692,12 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
                 cursor.execute('insert into log(电话,购买记录,购买时间,工号,金额)values("%s","%s","%s","%s","%s")'
                                % (self.cust_phone.text().strip(), logtemp, now, self.lineEdit_2.text().strip(), sumThing))
 
-            print("打印")
+            #print("打印")
             Printmain(name = self.cust_name.text().strip(), phone = self.cust_phone.text().strip(), data=Thing_FinList, fin=sumThing, keyongThing=keyongThing,Hand_FinList=Hand_FinList)  # 打印小票信息
-
+        except TypeError:
+            QMessageBox.critical(self, "警告", "重新选择项目", QMessageBox.Yes)
+            conn.rollback()
+            logging.info("-----以上消息失效------")
         except IOError:
             QMessageBox.critical(self, "警告", "检查数据库连接\n并与管理员联系\n错误代码:3456", QMessageBox.Yes)
             conn.rollback()
@@ -700,6 +722,7 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
             # 初始化
             self.cust_name.setText("")
             self.cust_phone.setText("")
+            self.label_5.setText("")
             self.showShoufa.clear()
             self.showYaopin.clear()
 

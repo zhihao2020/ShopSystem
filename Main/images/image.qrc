@@ -3,5 +3,7 @@
     <file>image.qrc</file>
     <file>search.ico</file>
     <file>print.ico</file>
+    <file>checkbox_checked_32px.png</file>
+    <file>checkbox_unchecked_32px.png</file>
   </qresource>
 </RCC>
