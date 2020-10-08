@@ -33,8 +33,9 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
         self.handList = []
         self.init()
         self.birthDayMusic()
+        self.clock_beifen()
         self.trayIcon()
-
+        QApplication.setQuitOnLastWindowClosed(False)
     def init(self):
         # 连接数据库
         self.db = QSqlDatabase.addDatabase('QSQLITE', "db2")
@@ -65,14 +66,17 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
         self.index = 0
 
     def update(self):
-        reply = QMessageBox.information(self,"提示","是否升级该软件？",QMessageBox.Yes|QMessageBox.No)
+        reply = QMessageBox.information(self,"提示","是否升级该软件？",QMessageBox.Yes|QMessageBox.No,QMessageBox.Yes)
         if reply == QMessageBox.Yes:
             if self.beifen():
                 #运行update.exe
-                
                 subprocess.call("update.exe",shell=True)
-            
             else:QMessageBox.information(self,"提示","备份失败",QMessageBox.Yes)
+
+    def clock_beifen(self):
+        if datetime.datetime.now().weekday() == 4:
+            self.beifen()
+
     def beifen(self):
         try:
             dir = r"C:\YIQIguanli"
@@ -90,6 +94,7 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
             QMessageBox.information(self,"提示","备份完成，请定时备份数据文件",QMessageBox.Yes)
             logging.info('备份数据文件')
             return True
+
     def trayIcon(self):
 
         tuopan = QSystemTrayIcon(self)
@@ -98,14 +103,14 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
         tuopan.setToolTip(u"欢迎使用医琦软件")
 
         a1 = QAction('&显示(Show)',self,triggered=self.show)
-        a2 = QAction('&退出(Exit)',self,triggered=self.quitApp)  # 直接退出可以用qApp.quit
+        a2 = QAction('&退出(Exit)',self,triggered=self.quit_app)  # 直接退出可以用qApp.quit
         tpMenu = QMenu()
         tpMenu.addAction(a1)
         tpMenu.addAction(a2)
         tuopan.setContextMenu(tpMenu)
         tuopan.activated.connect(self.iconActivated)
         tuopan.show()
-        tuopan.showMessage(u"标题", '托盘信息内容', icon=0)  # icon的值  0没有图标  1是提示  2是警告  3是错误
+        #tuopan.showMessage(u"标题", '托盘信息内容', icon=0)  # icon的值  0没有图标  1是提示  2是警告  3是错误
 
     def iconActivated(self,reason):
         if reason == QSystemTrayIcon.DoubleClick:
@@ -117,11 +122,11 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
         elif reason == QSystemTrayIcon.Trigger:
             pass
 
-    def quitApp(self):
+    def quit_app(self):
         re = QMessageBox.question(self, "提示", "退出系统", QMessageBox.Yes |
                                   QMessageBox.No, QMessageBox.No)
         if re == QMessageBox.Yes:
-            app.exit()
+            sys.exit(app.exec_())
 
     def openDB(self):
         self.db.open()

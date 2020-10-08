@@ -16,7 +16,7 @@ class Load_login(QMainWindow,Ui_widget):
         self.is_admin_signal.connect(self.jump)
 
     def checkLive(self):
-        n = 1 #计数
+        n = 0 #计数
         for proc in psutil.process_iter():
             if proc.name() == "yiqi.exe":
                 n += 1

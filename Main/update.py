@@ -106,6 +106,7 @@ class Thread(QThread,Ui_Form):
     def __init__(self):
         super(Thread,self).__init__()
         self.download_path = os.getcwd()
+        self.latest_tag=None
         # 检查是否为最新版本
     def run(self):
         try:
@@ -114,6 +115,8 @@ class Thread(QThread,Ui_Form):
             self.download(download_url, file_size)
             self.Button_signal.emit(True)
             self.unzip()
+            with open("softID.io", 'w') as f:
+                f.write(self.latest_tag)
             self.End_signal.emit(1)
         except TypeError:
             self.Error_signal.emit(2)
@@ -128,18 +131,16 @@ class Thread(QThread,Ui_Form):
             if response.status_code != 200:
                 raise Exception("网络异常")
             temp = json.loads(response.text)
-            latest_tag = temp["tag_name"]
-            print(latest_tag)
+            self.latest_tag = temp["tag_name"]
+            print(self.latest_tag)
             if not os.path.exists("softID.io"):
                 file = open("softID.io","w")
                 file.close()
             with open("softID.io",'r') as f:
                 previous_tag = f.readline()
-            if latest_tag != previous_tag:
+            if self.latest_tag != previous_tag:
                 download_url = temp["assets"][0]['browser_download_url']
                 file_size = temp['assets'][0]['size']
-                with open("softID.io",'w') as f:
-                    f.write(latest_tag)
                 return download_url,file_size
             else:
                 self.New_signal.emit(3)
@@ -178,6 +179,7 @@ class Thread(QThread,Ui_Form):
             extract_dir=current_path
         )
         os.remove(update_file_path)
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     myWin = AppUI()
