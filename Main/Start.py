@@ -3,6 +3,7 @@ from UI.InTo import Ui_widget
 from PyQt5.QtSql import QSqlDatabase,QSqlQuery
 from PyQt5.QtCore import  pyqtSignal
 import myMainWindow
+import psutil
 import sys
 
 class Load_login(QMainWindow,Ui_widget):
@@ -10,9 +11,18 @@ class Load_login(QMainWindow,Ui_widget):
     def __init__(self):
         super(Load_login,self).__init__()
         self.setupUi(self)
+        self.checkLive()
         self.InTo.clicked.connect(self.post_to_sql)
         self.is_admin_signal.connect(self.jump)
 
+    def checkLive(self):
+        n = 0 #计数
+        for proc in psutil.process_iter():
+            if proc.name == "yiqi.exe":
+                n += 1
+        if n > 1:
+            QMessageBox.information(self,"提示","医琦管理系统 正在运行中ing...",QMessageBox.Yes)
+            self.close()
 
     def post_to_sql(self):
         dbs = QSqlDatabase.addDatabase('QSQLITE')
@@ -33,7 +43,6 @@ class Load_login(QMainWindow,Ui_widget):
                 print(QMessageBox.information(self, "提示", "密码错误", QMessageBox.Yes, QMessageBox.Yes))
 
     def jump(self):
-        print("hello")
         self.close()
         self.jumper = myMainWindow.reload_mainWin()
         self.jumper.show()

@@ -14,10 +14,12 @@ from customerData import DataGrid
 from Addjifen import AddJifenData
 from addpeopleNum import addShouNum
 import datetime
+import time
 import logging
 import sqlite3
-import cgitb
 import os
+import subprocess
+import zipfile
 from connectPrinter import Printmain
 
 logging.basicConfig(filename='ProgramLog.log', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s:')
@@ -31,7 +33,8 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
         self.handList = []
         self.init()
         self.birthDayMusic()
-        cgitb.enable(format='text')
+        self.trayIcon()
+
     def init(self):
         # 连接数据库
         self.db = QSqlDatabase.addDatabase('QSQLITE', "db2")
@@ -46,7 +49,8 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
         self.action_3.triggered.connect(self.init_addUserShouNum)
         self.action_2.triggered.connect(self.addPeople_init)
         self.action_6.triggered.connect(self.add_Jifen)
-        self.action_7.triggered.connect(self.clear_name_phone)
+        self.action_9.triggered.connect(self.update)
+        self.action_10.triggered.connect(self.beifen)
         self.action.triggered.connect(self.about)
         # 按钮
         self.pushButton_2.clicked.connect(self.Flow)
@@ -60,6 +64,65 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
         self.tabWidget.currentChanged['int'].connect(self.currentTab)
         self.index = 0
 
+    def update(self):
+        reply = QMessageBox.information(self,"提示","是否升级该软件？",QMessageBox.Yes|QMessageBox.No)
+        if reply == QMessageBox.Yes:
+            if self.beifen():
+                #运行update.exe
+                
+                subprocess.call("update.exe",shell=True)
+            
+            else:QMessageBox.information(self,"提示","备份失败",QMessageBox.Yes)
+    def beifen(self):
+        try:
+            dir = r"C:\YIQIguanli"
+            file = r"C:\YIQIguanli\%s.zip"%time.strftime("%Y-%m-%d", time.localtime())
+            if not os.path.exists(dir):
+                os.makedirs(dir)
+            newZip = zipfile.ZipFile(file,'w')
+            newZip.write('data/all.db')
+            newZip.write('data/password.db')
+            newZip.write("ProgramLog.log")
+            newZip.close()
+        except:
+            QMessageBox.warning(self,"警告","备份过程发生错误",QMessageBox.Yes)
+        else:
+            QMessageBox.information(self,"提示","备份完成，请定时备份数据文件",QMessageBox.Yes)
+            logging.info('备份数据文件')
+            return True
+    def trayIcon(self):
+
+        tuopan = QSystemTrayIcon(self)
+        tuopan.setIcon(QtGui.QIcon(r"images/snail.ico"))
+
+        tuopan.setToolTip(u"欢迎使用医琦软件")
+
+        a1 = QAction('&显示(Show)',self,triggered=self.show)
+        a2 = QAction('&退出(Exit)',self,triggered=self.quitApp)  # 直接退出可以用qApp.quit
+        tpMenu = QMenu()
+        tpMenu.addAction(a1)
+        tpMenu.addAction(a2)
+        tuopan.setContextMenu(tpMenu)
+        tuopan.activated.connect(self.iconActivated)
+        tuopan.show()
+        tuopan.showMessage(u"标题", '托盘信息内容', icon=0)  # icon的值  0没有图标  1是提示  2是警告  3是错误
+
+    def iconActivated(self,reason):
+        if reason == QSystemTrayIcon.DoubleClick:
+            if self.isMinimized() or not self.isVisible():
+                self.showNormal()
+                self.activateWindow()
+            else:
+                self.hide()
+        elif reason == QSystemTrayIcon.Trigger:
+            pass
+
+    def quitApp(self):
+        re = QMessageBox.question(self, "提示", "退出系统", QMessageBox.Yes |
+                                  QMessageBox.No, QMessageBox.No)
+        if re == QMessageBox.Yes:
+            app.exit()
+
     def openDB(self):
         self.db.open()
         if self.db.open() is None:
@@ -68,9 +131,6 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
         self.query = QSqlQuery(self.db)
         self.query2 = QSqlQuery(self.db)
         self.query3 = QSqlQuery(self.db)
-
-    def clear_name_phone(self):
-        self.cust_phone.setText(" ") and self.cust_name.setText(" ")
 
     def about(self):
         webbrowser.open_new_tab('https://zhihao2020.github.io/about/')
@@ -219,7 +279,9 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
                     # print("SELECT %s from 顾客 where 姓名='%s'" % (self.query2.value(0), self.cust_name.text()))
                 littleFlag = False
                 while (self.query3.next()):
-                    self.showShoufa.setItem(i, 4, QTableWidgetItem(str(self.query3.value(0))))
+                    restItem =  QTableWidgetItem(str(self.query3.value(0)))
+                    restItem.setFont(QtGui.QFont("SimSun", 20))
+                    self.showShoufa.setItem(i, 4,restItem)
                     littleFlag = True
                 if not littleFlag:
                     self.showShoufa.setItem(i, 4, QTableWidgetItem(" "))
@@ -230,7 +292,7 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
     def changPrize(self, item):
         # print(222)
         if self.index == 0:
-            # print(12,self.showYaopin.item(item.row(),1).text())
+            #print(12,self.showYaopin.item(item.row(),1).text())
             self.change_Pice = ChangePrice(self.showYaopin.item(item.row(), 1).text(),
                                            self.showYaopin.item(item.row(), 2).text(), item.row())
             self.change_Pice.Signal_TwoParameter.connect(self.changePrize2)
@@ -329,7 +391,6 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
         name = []
         phone = []
         try:
-            uidNum = 0
             conn = sqlite3.connect("data/all.db")
             cursor = conn.cursor()
             cursor.execute("select 姓名,电话 from 顾客")
@@ -337,7 +398,6 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
             for tempNum in cursor.fetchall():
                 name.append(tempNum[0])
                 phone.append(tempNum[1])
-                uidNum += 1
 
             if lis[0] in name or lis[1] in phone:
                 QMessageBox.information(self, '提示', '该用户已经存在', QMessageBox.Yes)
@@ -347,8 +407,8 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
                                                 '将添加新用户\n 仅仅添加姓名:%s、年龄:%s、电话信息:%s' % (lis[0], lis[1], lis[2]),
                                                 QMessageBox.Yes | QMessageBox.Yes)
                 if reply == QMessageBox.Yes:
-                    cursor.execute("insert into 顾客(uid,姓名,年龄,电话,生日) values('%d','%s','%s','%s','%s')" % (
-                        uidNum, lis[0], lis[1], lis[2], lis[3]))
+                    cursor.execute("insert into 顾客(姓名,年龄,电话,生日) values('%s','%s','%s','%s')" % (
+                        lis[0], lis[1], lis[2], lis[3]))
                     conn.commit()
         except IOError:
             QMessageBox.critical(self, "警告", "请检查数据库文件\n或与管理员联系\n错误代码：8689", QMessageBox.Yes)
@@ -357,12 +417,12 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
             if e == "用户已存在":
                 pass
             else:
-                QMessageBox.critical(self, "警告", "请与管理员联系\n错误代码：8690", QMessageBox.Y)
+                QMessageBox.critical(self, "警告", "%s\n错误代码：8690"%e, QMessageBox.Yes)
                 conn.rollback()
         else:
             print(QMessageBox.information(self, "提示", '添加用户成功', QMessageBox.Yes | QMessageBox.Yes))
-            text = "insert into 顾客(uid,姓名,年龄,电话,生日) values('%d','%s','%s','%s','%s')" % (
-                uidNum, lis[0], lis[1], lis[2], lis[3])
+            text = "insert into 顾客(姓名,年龄,电话,生日) values('%s','%s','%s','%s')" % (
+                 lis[0], lis[1], lis[2], lis[3])
             logging.info('添加用户---%s' % text)
         finally:
             conn.close()
@@ -444,7 +504,7 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
                     Num = initNum + int(lis[3])
 
                     text = "update 顾客 set '%s'='%s' where 姓名='%s'" % (lis[2], Num, lis[0])
-                    print(text)
+
                     cursor.execute("update 顾客 set '%s'='%s' where 姓名='%s'" % (lis[2], Num, lis[0]))
                     conn.commit()
 
@@ -490,14 +550,12 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
             print(MONERY)
             tempList = cursor.fetchone()
             print(tempList[0])
-            print(tempList[1])
-
             self.money_vaild_2.display(tempList[0])
             self.jifen.display(tempList[1])
             if tempflag:
-                self.label_5.setText("电话：" + tempList[2])
+                self.label_5.setText("电话：" + str(tempList[2]))
             else:
-                self.label_5.setText("姓名：" + tempList[2])
+                self.label_5.setText("姓名：" + str(tempList[2]))
             testList = cursor.fetchall()
             if testList:
                 tempStr = ""
@@ -507,22 +565,21 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
             self.showThings2()  # 触发手法
             self.showThings()
         except TypeError:
+            print(121212)
             self.money_vaild_2.display(0)
             self.jifen.display(0)
             self.showThings2()  # 触发手法
             self.showThings()
-        except:
-            conn.rollback()
-            QMessageBox.critical(self, "警告", "错误代码：9898", QMessageBox.Yes)
         finally:
             conn.close()
 
     def add_Jifen(self):
         self.add_Jifen_temp = AddJifenData()
         self.add_Jifen_temp.show()
-
     # 关闭数据库
     def closeEvent(self, event):
+        event.ignore()
+        self.hide()
         self.db.close()
 
     def Get_data(self):

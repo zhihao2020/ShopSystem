@@ -7,7 +7,7 @@ class DataGrid(QWidget):
 
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("用户")
+        self.setWindowTitle("统计数据")
         self.resize(750, 300)
 
         # 查询模型
@@ -144,7 +144,9 @@ class DataGrid(QWidget):
 
     # 得到记录数
     def getTotalRecordCount(self):
-        self.queryModel.setQuery("select 顾客姓名,电话,购买记录,购买时间,工号,金额 from log")
+        self.queryModel.setQuery("select 顾客姓名 from log")
+        while (self.queryModel.canFetchMore()):
+            self.queryModel.fetchMore()
         rowCount = self.queryModel.rowCount()
         print('rowCount=' + str(rowCount))
         return rowCount

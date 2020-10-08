@@ -7,7 +7,7 @@ def Printmain(name=None,phone=None,data=None, fin=None, keyongThing=None, Hand_F
     p.lines = []
     p.add_line("医琦母婴护理")
     p.add_line("**************")
-    p.add_line("下单时间:" + strftime("%d/%m/%Y %X", localtime()))
+    p.add_line("下单时间:" + strftime("%Y-%m-%d %X", localtime()))
     if name:
         p.add_line("顾客姓名：" + name)
     if phone:
@@ -32,12 +32,10 @@ def Printmain(name=None,phone=None,data=None, fin=None, keyongThing=None, Hand_F
     p.add_line("欢迎光临，谢谢惠顾！")
     p.add_line("医琦母婴护理")
     p.add_line("\n")
-
     p.add_line("******自此裁剪******")
-
     p.add_line("医琦母婴护理")
     p.add_line("**************")
-    p.add_line("下单时间:" + strftime("%d/%m/%Y %X", localtime()))
+    p.add_line("下单时间:" + strftime("%Y-%m-%d %X", localtime()))
     if name:
         p.add_line("顾客姓名：" + name)
     if phone:

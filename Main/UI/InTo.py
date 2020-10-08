@@ -69,7 +69,7 @@ class Ui_widget(object):
         _translate = QtCore.QCoreApplication.translate
         widget.setWindowTitle(_translate("widget", "登录"))
         self.InTo.setText(_translate("widget", "登录"))
-        self.labe.setText(_translate("widget", "Name"))
-        self.label2.setText(_translate("widget", "PassWord"))
+        self.labe.setText(_translate("widget", "用户名"))
+        self.label2.setText(_translate("widget", "密码"))
         self.label.setText(_translate("widget", "欢迎使用"))
 
