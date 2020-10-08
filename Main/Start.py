@@ -16,13 +16,13 @@ class Load_login(QMainWindow,Ui_widget):
         self.is_admin_signal.connect(self.jump)
 
     def checkLive(self):
-        n = 0 #计数
+        n = 1 #计数
         for proc in psutil.process_iter():
-            if proc.name == "yiqi.exe":
+            if proc.name() == "yiqi.exe":
                 n += 1
         if n > 1:
             QMessageBox.information(self,"提示","医琦管理系统 正在运行中ing...",QMessageBox.Yes)
-            self.close()
+            raise Exception
 
     def post_to_sql(self):
         dbs = QSqlDatabase.addDatabase('QSQLITE')
