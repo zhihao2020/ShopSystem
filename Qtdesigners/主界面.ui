@@ -392,6 +392,7 @@
      <string>文件</string>
     </property>
     <addaction name="refreash"/>
+    <addaction name="action_11"/>
     <addaction name="action_7"/>
    </widget>
    <widget class="QMenu" name="menu_2">
@@ -529,6 +530,11 @@
   <action name="action_10">
    <property name="text">
     <string>备份</string>
+   </property>
+  </action>
+  <action name="action_11">
+   <property name="text">
+    <string>打印上次小票</string>
    </property>
   </action>
  </widget>

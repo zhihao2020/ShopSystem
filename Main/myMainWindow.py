@@ -4,6 +4,7 @@ from PyQt5.QtCore import Qt
 from PyQt5 import QtCore,QtGui
 import sys
 import webbrowser
+import json
 from pygame import mixer
 from UI.MainWindow import Ui_mainWindow
 from Addpeople import addPeople
@@ -52,6 +53,7 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
         self.action_6.triggered.connect(self.add_Jifen)
         self.action_9.triggered.connect(self.update)
         self.action_10.triggered.connect(self.beifen)
+        self.action_11.triggered.connect(self.publish_previous)
         self.action.triggered.connect(self.about)
         # 按钮
         self.pushButton_2.clicked.connect(self.Flow)
@@ -154,6 +156,12 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
             mixer.music.set_volume(1)
             QMessageBox.information(self, "提示", tempText, QMessageBox.Yes)
         self.db.close()
+    def publish_previous(self):
+        with open("ppx.json","r",encoding="utf-8") as fd:
+            s = json.load(fd)
+            #print(s[2])
+            #print(s[4])
+            Printmain(name=s[0], phone =s[1], data=s[2], fin=s[3], keyongThing=s[4],Hand_FinList=s[5])  # 打印小票信息
 
     def currentTab(self, index):
         if index == 0:
@@ -755,6 +763,11 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
                                % (self.cust_phone.text().strip(), logtemp, now, self.lineEdit_2.text().strip(), sumThing))
 
             #print("打印")
+            publish_previous_list = [self.cust_name.text().strip(),self.cust_phone.text().strip(),Thing_FinList,sumThing,keyongThing,Hand_FinList]
+
+            with open("ppx.json","w",encoding="utf-8") as fd:
+                fd.write(json.dumps(publish_previous_list))
+
             Printmain(name = self.cust_name.text().strip(), phone = self.cust_phone.text().strip(), data=Thing_FinList, fin=sumThing, keyongThing=keyongThing,Hand_FinList=Hand_FinList)  # 打印小票信息
         except TypeError:
             QMessageBox.critical(self, "警告", "重新选择项目", QMessageBox.Yes)
