@@ -104,7 +104,7 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
 
         tuopan.setToolTip(u"欢迎使用医琦软件")
 
-        a1 = QAction('&显示(Show)',self,triggered=self.show)
+        a1 = QAction('&显示(Show)',self,triggered=self.showNormal)
         a2 = QAction('&退出(Exit)',self,triggered=self.quit_app)  # 直接退出可以用qApp.quit
         tpMenu = QMenu()
         tpMenu.addAction(a1)
@@ -159,8 +159,6 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
     def publish_previous(self):
         with open("ppx.json","r",encoding="utf-8") as fd:
             s = json.load(fd)
-            #print(s[2])
-            #print(s[4])
             Printmain(name=s[0], phone =s[1], data=s[2], fin=s[3], keyongThing=s[4],Hand_FinList=s[5])  # 打印小票信息
 
     def currentTab(self, index):
@@ -236,7 +234,6 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
             # print("SELECT 名称,价格,备注 from things where 名称='%s'"%self.query.value(0))
             while (self.query2.next()):
                 for n in range(4):
-                    # print("第",i,"行，","第",n,"列")
                     ck = QCheckBox()
                     combox_Style="QCheckBox::indicator { width:32px; height: 32px;} " \
                                  "QCheckBox::indicator::unchecked {image: url(%s/images/unchecked.png);}" \
@@ -762,13 +759,17 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
                 cursor.execute('insert into log(电话,购买记录,购买时间,工号,金额)values("%s","%s","%s","%s","%s")'
                                % (self.cust_phone.text().strip(), logtemp, now, self.lineEdit_2.text().strip(), sumThing))
 
-            #print("打印")
             publish_previous_list = [self.cust_name.text().strip(),self.cust_phone.text().strip(),Thing_FinList,sumThing,keyongThing,Hand_FinList]
 
             with open("ppx.json","w",encoding="utf-8") as fd:
                 fd.write(json.dumps(publish_previous_list))
 
             Printmain(name = self.cust_name.text().strip(), phone = self.cust_phone.text().strip(), data=Thing_FinList, fin=sumThing, keyongThing=keyongThing,Hand_FinList=Hand_FinList)  # 打印小票信息
+            reply = QMessageBox.information(self,"提示","是否继续打印小票？",QMessageBox.Yes|QMessageBox.No,QMessageBox.Yes)
+            if reply == QMessageBox.Yes:
+                Printmain(name=self.cust_name.text().strip(), phone=self.cust_phone.text().strip(), data=Thing_FinList,
+                          fin=sumThing, keyongThing=keyongThing, Hand_FinList=Hand_FinList)  # 打印小票信息
+            else:pass
         except TypeError:
             QMessageBox.critical(self, "警告", "重新选择项目", QMessageBox.Yes)
             conn.rollback()

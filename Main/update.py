@@ -7,6 +7,7 @@ import requests
 import shutil
 import psutil
 import os
+import zipfile
 
 class Ui_Form(object):
     def setupUi(self, Form):
@@ -124,8 +125,7 @@ class Thread(QThread,Ui_Form):
         # 确定当前软件是否为最新版
         params = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.129 Safari/537.36",
-            "Host": "api.github.com",
-            "Connection": "keep-alive"}
+            "Host": "api.github.com"}
         try:
             response = requests.get("https://api.github.com/repos/zhihao2020/ShopSystem/releases/latest", params=params)
             if response.status_code != 200:
@@ -156,8 +156,7 @@ class Thread(QThread,Ui_Form):
         print("downloading ....")
         temp_file = os.path.join(self.download_path,'update.zip')
         params = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.129 Safari/537.36",
-            "Connection": "keep-alive"}
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.129 Safari/537.36"}
         with open(temp_file,'wb') as self.fileobj:
             f = requests.get(download_url,stream=True,params=params)
             offset = 0
@@ -171,9 +170,18 @@ class Thread(QThread,Ui_Form):
                 self.trigger.emit(int(proess))
 
     def unzip(self):
-        #解压 覆盖
+        self.kill_process()
         current_path = os.path.dirname(os.path.abspath(__file__))
         update_file_path = os.path.join(self.download_path, 'update.zip')
+        with zipfile.ZipFile(update_file_path) as fd:
+            for n in fd.namelist():
+                try:
+                    os.remove(n)
+                except:
+                    try:
+                        shutil.rmtree(n)
+                    except:
+                        print(n)
         shutil.unpack_archive(
             filename=update_file_path,
             extract_dir=current_path
