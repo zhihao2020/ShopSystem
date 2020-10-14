@@ -55,7 +55,6 @@ class Ui_Form(object):
         self.horizontalLayout.addWidget(self.label_2)
         self.verticalLayout.addLayout(self.horizontalLayout)
         self.horizontalLayout_2.addLayout(self.verticalLayout)
-
         self.retranslateUi(Form)
         QtCore.QMetaObject.connectSlotsByName(Form)
 

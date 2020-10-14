@@ -22,7 +22,7 @@ class Load_login(QMainWindow,Ui_widget):
                 n += 1
         if n > 1:
             QMessageBox.information(self,"提示","医琦管理系统 正在运行中ing...",QMessageBox.Yes)
-            sys.exit(app.exec_())
+            self.close()
 
     def post_to_sql(self):
         dbs = QSqlDatabase.addDatabase('QSQLITE')

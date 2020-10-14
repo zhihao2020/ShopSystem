@@ -151,11 +151,12 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
                 tempText += "姓名:%s ,电话:%s ,生日:%s\n" % (self.query.value(0), self.query.value(1), self.query.value(2))
         if tempText != "":
             mixer.init()
-            mixer.music.load(r"images\生日歌.mp3")
+            mixer.music.load(r"images\birthday.mp3")
             mixer.music.play(loops=1, start=0.0)
             mixer.music.set_volume(1)
             QMessageBox.information(self, "提示", tempText, QMessageBox.Yes)
         self.db.close()
+
     def publish_previous(self):
         with open("ppx.json","r",encoding="utf-8") as fd:
             s = json.load(fd)
@@ -283,8 +284,13 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
                     newItem.setFont(QtGui.QFont("SimSun", 20))
                     self.showShoufa.setCellWidget(i, 0, ck)
                     self.showShoufa.setItem(i, n + 1, newItem)
-                    self.query3.exec_(
-                        "SELECT %s from 顾客 where 姓名='%s'" % (self.query2.value(0), self.cust_name.text().strip()))
+                    if self.cust_name.text().strip() != "":
+                        self.query3.exec_(
+                            "SELECT %s from 顾客 where 姓名='%s'" % (self.query2.value(0), self.cust_name.text().strip()))
+                    else:
+                        self.query3.exec_(
+                            "SELECT %s from 顾客 where 电话='%s'" % (self.query2.value(0), self.cust_phone.text().strip()))
+
                     self.showShoufa.setCellWidget(i, 5, Qs)
                     # print("SELECT %s from 顾客 where 姓名='%s'" % (self.query2.value(0), self.cust_name.text()))
                 littleFlag = False
@@ -745,7 +751,7 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
             elif self.cust_phone.text().strip():
                 for temp in Hand_FinList:
                     cursor.execute("update 顾客 set '%s' = '%s' where 电话 ='%s'" % (
-                        str(temp[0]), temp[1], self.cust_phone.text().strip()))
+                        str(temp[0]), temp[1], self.cust_phone.text()))
                     text3 = "【修改用户信息】电话:%s %s=%s" % (self.cust_phone.text(), temp[0], temp[1])
                     logging.info(text3)
 
@@ -786,6 +792,7 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
             QMessageBox.critical(self, "警告", "检查打印机连接\n或与管理员联系\n错误代码:3458", QMessageBox.Yes)
             conn.rollback()
             logging.info("-----以上消息失效------")
+
         except Exception as e:
             QMessageBox.critical(self, "警告\n错误代码：78", "%s" % e, QMessageBox.Yes)
             conn.rollback()
@@ -798,7 +805,7 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
             # 初始化
             self.cust_name.setText("")
             self.cust_phone.setText("")
-            self.label_5.setText("")
+            self.label_5.setText(" ")
             self.showShoufa.clear()
             self.showYaopin.clear()
 
