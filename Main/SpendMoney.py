@@ -46,7 +46,7 @@ class Ui_Form(object):
         font = QtGui.QFont()
         font.setPointSize(14)
         self.doubleSpinBox.setFont(font)
-        self.doubleSpinBox.setMaximum(9999999)
+        self.doubleSpinBox.setMaximum(0)
         self.doubleSpinBox.setMinimum(-9999999)
         self.doubleSpinBox.setObjectName("doubleSpinBox")
         self.gridLayout.addWidget(self.doubleSpinBox, 2, 1, 1, 1)
