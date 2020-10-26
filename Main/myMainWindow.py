@@ -457,20 +457,24 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
             cursor.execute("select 药品可用金额 from 顾客 where 姓名='%s' or 电话 ='%s'"%(lis[0],lis[0]))
             print("select 药品可用金额 from 顾客 where 姓名='%s' or 电话='%s'"%(lis[0],lis[0]))
             tempList = cursor.fetchone()
-            print(tempList[0])
-            money = float(lis[1])+float(tempList[0])
+            money = float(lis[1])+float(tempList[0]) #最后得到的金额
 
             reply = QMessageBox.information(self, '提示', '将对该用户 %s 进行充值 %s' % (lis[0],lis[1]), QMessageBox.Yes,QMessageBox.No)
             if reply == QMessageBox.Yes:
                 cursor.execute("update 顾客 set 药品可用金额=%s where 姓名='%s' or 电话 ='%s'" % (money,lis[0],lis[0]))
                 text = "update 顾客 set 药品可用金额=%s where 姓名='%s' or 电话 ='%s'" % (money,lis[0],lis[0])
                 logging.info('【用户消费】---%s' % text)
+            data = [['直接扣费','%s'%lis[1],'1']]
         except IOError:
             QMessageBox.critical(self, "警告", "请检查数据库文件\n或与管理员联系\n错误代码:4501", QMessageBox.Yes)
         except Exception as e:
             QMessageBox.critical(self, "警告", "%s\n错误代码:4502"%e, QMessageBox.Yes)
         else:
             conn.commit()
+            Printmain(name=lis[0], phone=lis[0], data=data,fin=lis[1],keyongThing=money)  # 打印小票信息
+            reply = QMessageBox.information(self, "提示", "是否继续打印小票？", QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
+            if reply == QMessageBox.Yes:
+                Printmain(name=lis[0], phone=lis[0], data=data,fin=lis[1],keyongThing=money)  # 打印小票信息
         finally:
             conn.close()
     def init_addUserMoney(self):
