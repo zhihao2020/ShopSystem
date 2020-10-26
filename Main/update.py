@@ -107,7 +107,7 @@ class Thread(QThread,Ui_Form):
         super(Thread,self).__init__()
         self.download_path = os.getcwd()
         self.latest_tag=None
-        # 检查是否为最新版本
+
     def run(self):
         try:
             download_url, file_size = self.check_latest()

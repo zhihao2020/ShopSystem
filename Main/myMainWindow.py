@@ -6,6 +6,13 @@ import sys
 import webbrowser
 import json
 from pygame import mixer
+import datetime
+import time
+import logging
+import sqlite3
+import os
+import subprocess
+import zipfile
 from UI.MainWindow import Ui_mainWindow
 from Addpeople import addPeople
 from Addthing import addThing
@@ -14,13 +21,7 @@ from ChangeZhekou import ChangePrice
 from customerData import DataGrid
 from Addjifen import AddJifenData
 from addpeopleNum import addShouNum
-import datetime
-import time
-import logging
-import sqlite3
-import os
-import subprocess
-import zipfile
+from SpendMoney import SpendWindow
 from connectPrinter import Printmain
 
 logging.basicConfig(filename='ProgramLog.log', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s:')
@@ -54,6 +55,7 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
         self.action_9.triggered.connect(self.update)
         self.action_10.triggered.connect(self.beifen)
         self.action_11.triggered.connect(self.publish_previous)
+        self.action_12.triggered.connect(self.init_spendmoney)
         self.action.triggered.connect(self.about)
         # 按钮
         self.pushButton_2.clicked.connect(self.Flow)
@@ -140,7 +142,7 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
         self.query3 = QSqlQuery(self.db)
 
     def about(self):
-        webbrowser.open_new_tab('https://zhihao2020.github.io/about/')
+        webbrowser.open_new_tab('https://xuzhihao.top/about/')
 
     def birthDayMusic(self):
         self.openDB()
@@ -442,7 +444,35 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
             logging.info('添加用户---%s' % text)
         finally:
             conn.close()
+    def init_spendmoney(self):
+        self.SpendWindow = SpendWindow()
+        self.SpendWindow.Signal_TwoParameter.connect(self.spendmoney)
+        self.SpendWindow.setWindowModality(Qt.ApplicationModal)
+        self.SpendWindow.show()
 
+    def spendmoney(self,lis):
+        try:
+            conn = sqlite3.connect("data/all.db")
+            cursor = conn.cursor()
+            cursor.execute("select 药品可用金额 from 顾客 where 姓名='%s' or 电话 ='%s'"%(lis[0],lis[0]))
+            print("select 药品可用金额 from 顾客 where 姓名='%s' or 电话='%s'"%(lis[0],lis[0]))
+            tempList = cursor.fetchone()
+            print(tempList[0])
+            money = float(lis[1])+float(tempList[0])
+
+            reply = QMessageBox.information(self, '提示', '将对该用户 %s 进行充值 %s' % (lis[0],lis[1]), QMessageBox.Yes,QMessageBox.No)
+            if reply == QMessageBox.Yes:
+                cursor.execute("update 顾客 set 药品可用金额=%s where 姓名='%s' or 电话 ='%s'" % (money,lis[0],lis[0]))
+                text = "update 顾客 set 药品可用金额=%s where 姓名='%s' or 电话 ='%s'" % (money,lis[0],lis[0])
+                logging.info('【用户消费】---%s' % text)
+        except IOError:
+            QMessageBox.critical(self, "警告", "请检查数据库文件\n或与管理员联系\n错误代码:4501", QMessageBox.Yes)
+        except Exception as e:
+            QMessageBox.critical(self, "警告", "%s\n错误代码:4502"%e, QMessageBox.Yes)
+        else:
+            conn.commit()
+        finally:
+            conn.close()
     def init_addUserMoney(self):
         self.addPeopleMoney = addMoney()
         self.addPeopleMoney.Signal_ThreeParameter.connect(self.addUserMoney)
@@ -450,8 +480,6 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
         self.addPeopleMoney.show()
 
     def addUserMoney(self, lis):
-        self.addPeopleMoney.setWindowModality(Qt.ApplicationModal)
-        self.addPeopleMoney.show()
         try:
             name = []
             phone = []
@@ -463,7 +491,7 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
                 phone.append(tempNum[1])
 
             if lis[0] in name:
-                reply = QMessageBox.information(self, '提示', '将对该用户%s进行充值' % lis[0], QMessageBox.Yes)
+                reply = QMessageBox.information(self, '提示', '将对该用户%s进行充值' % lis[0], QMessageBox.Yes,QMessageBox.No)
                 if reply == QMessageBox.Yes:
                     cursor.execute("SELECT 药品可用金额 from 顾客 where 姓名 ='%s'" % lis[0])
 
@@ -474,7 +502,7 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
                         logging.info('用户修改---%s' % text)
 
             elif lis[1] in phone:
-                reply = QMessageBox.information(self, '提示', '将对该用户%s 进行充值' % lis[1], QMessageBox.Yes)
+                reply = QMessageBox.information(self, '提示', '将对该用户%s 进行充值' % lis[1], QMessageBox.Yes,QMessageBox.No)
                 if reply == QMessageBox.Yes:
                     cursor.execute("SELECT 药品可用金额 from 顾客 where 电话 ='%s'" % lis[1])
                     shangpin = float(cursor.fetchone()[0]) + float(lis[2])
