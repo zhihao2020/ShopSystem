@@ -7,4 +7,5 @@ dist/
 Start.spec
 softID.io
 update.zip
+*.ini
 ppx.json

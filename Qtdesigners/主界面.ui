@@ -451,6 +451,7 @@
      <string>处理</string>
     </property>
     <addaction name="action_12"/>
+    <addaction name="action_13"/>
    </widget>
    <addaction name="menu"/>
    <addaction name="menu_2"/>
@@ -517,9 +518,7 @@
     <string>关于作者</string>
    </property>
    <property name="font">
-    <font>
-     <pointsize>9</pointsize>
-    </font>
+    <font/>
    </property>
   </action>
   <action name="action_3">
@@ -572,9 +571,12 @@
     <string>用户消费金额</string>
    </property>
    <property name="font">
-    <font>
-     <pointsize>9</pointsize>
-    </font>
+    <font/>
+   </property>
+  </action>
+  <action name="action_13">
+   <property name="text">
+    <string>发送错误报告</string>
    </property>
   </action>
  </widget>

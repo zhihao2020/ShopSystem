@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtSql import QSqlDatabase, QSqlQuery
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt,QThread,pyqtSignal
 from PyQt5 import QtCore,QtGui
 import sys
 import webbrowser
@@ -8,10 +8,14 @@ import json
 from pygame import mixer
 import datetime
 import time
+import smtplib
+from email.mime.text import MIMEText
 import logging
 import sqlite3
 import os
+import pyautogui
 import subprocess
+from configparser import ConfigParser
 import zipfile
 from UI.MainWindow import Ui_mainWindow
 from Addpeople import addPeople
@@ -37,12 +41,18 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
         self.birthDayMusic()
         self.clock_beifen()
         self.trayIcon()
+        self.wenzitishi = Information()
+        self.thread = Thread()
+        self.thread.sleep_signal.connect(self.windowSleep)
+        self.thread.information_signal.connect(self.showInformation)
+        self.thread.start()
         QApplication.setQuitOnLastWindowClosed(False)
     def init(self):
+        self.cfg = ConfigParser()
+        self.cfg.read("config.ini")
         # 连接数据库
         self.db = QSqlDatabase.addDatabase('QSQLITE', "db2")
         self.db.setDatabaseName('data/all.db')
-
         # this is QAction
         self.refreash.triggered.connect(self.reFreash)
         self.add_things.triggered.connect(self.addInformation)
@@ -68,6 +78,17 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
         self.showThings2()
         self.tabWidget.currentChanged['int'].connect(self.currentTab)
         self.index = 0
+
+    def showInformation(self,flag):
+        if flag:
+            self.wenzitishi.show()
+        else:
+            if self.wenzitishi.isVisible():
+                self.wenzitishi.close()
+
+    def windowSleep(self,flag):
+        if flag:
+            sys.exit(1)
 
     def update(self):
         reply = QMessageBox.information(self,"提示","是否升级该软件？",QMessageBox.Yes|QMessageBox.No,QMessageBox.Yes)
@@ -211,7 +232,6 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
         self.query.exec_("SELECT 名称 from things where 类别='{}'".format(kind))
         while (self.query.next()):
             n += 1
-        # print("数据库中有",n,"行")
         return n
 
     def showThings(self):
@@ -470,6 +490,9 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
             Printmain(name=lis[0], phone=lis[0], data=data, fin=lis[1], keyongThing=money)  # 打印小票信息
             reply = QMessageBox.information(self, "提示", "是否继续打印小票？", QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
             if reply == QMessageBox.Yes:
+                publish_previous_list = [lis[0],lis[0], data, lis[1], money,None]
+                with open("ppx.json", "w", encoding="utf-8") as fd:
+                    fd.write(json.dumps(publish_previous_list))
                 Printmain(name=lis[0], phone=lis[0], data=data, fin=lis[1], keyongThing=money)  # 打印小票信息
 
         except IOError:
@@ -508,7 +531,6 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
                     with sqlite3.connect("data/all.db") as tempdata:
                         tempdata.execute("update 顾客 set 药品可用金额=%s where 姓名='%s'" % (shangpin, lis[0]))
                         text = "update 顾客 set 药品可用金额=%s where 姓名='%s'" % (shangpin, lis[0])
-                        logging.info('用户修改---%s' % text)
 
             elif lis[1] in phone:
                 reply = QMessageBox.information(self, '提示', '将对该用户%s 进行充值' % lis[1], QMessageBox.Yes,QMessageBox.No)
@@ -518,13 +540,15 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
                     with sqlite3.connect("data/all.db") as tempdata:
                         tempdata.execute("update 顾客 set 药品可用金额='%s' where 电话='%s'" % (shangpin, lis[1]))
                         text = "update 顾客 set 药品可用金额='%s' where 电话='%s'" % (shangpin, lis[1])
-                        logging.info('用户修改---%s' % text)
             else:
                 QMessageBox.information(self, '提示', '不存在该用户', QMessageBox.Yes | QMessageBox.Yes)
         except IOError:
             QMessageBox.critical(self, "警告", "请检查数据库文件\n或与管理员联系\n错误代码:4401", QMessageBox.Yes)
         except sqlite3.OperationalError:
             QMessageBox.critical(self, "警告", "数据库被锁定\n请检查姓名或电话的唯一性\n错误代码:4402", QMessageBox.Yes)
+        else:
+            conn.commit()
+            logging.info('用户修改---%s' % text)
         finally:
             conn.close()
 
@@ -625,6 +649,19 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
             self.showThings()
         finally:
             conn.close()
+
+    def postError(self):
+        #读取 邮箱 秘钥
+        msg = MIMEText('hello,send by 医琦管理','plain','utf-8')
+        to_addr = self.cfg.get('default','To_addr')
+        from_addr = self.cfg.get('default','From_addr')
+        password = self.cfg.get('default','Password')
+        smtp_server = self.cfg.get('default','SMTP_server')
+        server = smtplib.SMTP(smtp_server,25)
+        server.set_debuglevel(1)
+        server.login(from_addr,password)
+        server.sendmail(from_addr,[to_addr],msg.as_string())
+        server.quit()
 
     def add_Jifen(self):
         self.add_Jifen_temp = AddJifenData()
@@ -845,6 +882,43 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
             self.label_5.setText(" ")
             self.showShoufa.clear()
             self.showYaopin.clear()
+
+class Thread(QThread,Ui_mainWindow):
+    #检测用户无输入，自动休眠
+    sleep_signal = pyqtSignal(bool)
+    information_signal = pyqtSignal(bool)
+    def __init__(self):
+        super(Thread, self).__init__()
+        self.config = ConfigParser()
+        self.config.read("config.ini")
+
+    def run(self):
+        while True:
+            num = 0
+            previousPostion = pyautogui.position()
+            print(previousPostion)
+            self.information_signal.emit(False)
+            time.sleep(1)
+            while previousPostion == pyautogui.position():
+                num +=1
+                time.sleep(1)
+                if num > self.config.getint('default','sleep_time')-5:
+                    self.information_signal.emit(True)
+                    if num >  self.config.getint('default','sleep_time'):
+                        self.sleep_signal.emit(True)
+
+class Information(QWidget):
+    def __init__(self):
+        super(Information,self).__init__()
+        self.initUI()
+    def initUI(self):
+        label = QLabel(self)
+        label.resize(700, 100)
+        label.setText("还有5秒钟，关闭软件")
+        label.setAlignment(Qt.AlignCenter)
+        label.setFont(QtGui.QFont("Arial", 40))
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.Tool | Qt.WindowStaysOnTopHint)
+        self.setAttribute(Qt.WA_TranslucentBackground)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
