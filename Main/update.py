@@ -95,7 +95,7 @@ class AppUI(QtWidgets.QWidget,Ui_Form):
             QMessageBox.warning(self, "警告", "出现错误，请稍后重试", QMessageBox.Yes)
         elif num==3:
             QMessageBox.information(self,'提示','当前软件为最新版本', QMessageBox.Yes)
-        self.close()
+        sys.exit()
 
 class Thread(QThread,Ui_Form):
     New_signal = pyqtSignal(int)
@@ -112,20 +112,23 @@ class Thread(QThread,Ui_Form):
         try:
             with open('update.ini','r') as f:
                 lines = f.readline()
+                print(lines.split(',')[2])
                 if lines.split(',')[2] == 1:
                     download_url = lines.split(',')[0]
                     file_size = lines.split(',')[1]
 
-                elif lines.split(',')[2] == 0:
+                else:
                     download_url, file_size = self.check_latest()
-            self.kill_process()
+                    print(download_url)
+
             self.download(download_url, file_size)
             self.Button_signal.emit(True)
             self.unzip()
             with open("softID.io", 'w') as f:
                 f.write(self.latest_tag)
             self.End_signal.emit(1)
-        except :
+        except Exception as e:
+            print(e)
             self.Error_signal.emit(2)
 
     def check_latest(self):
@@ -152,8 +155,9 @@ class Thread(QThread,Ui_Form):
             else:
                 self.New_signal.emit(3)
         except requests.exceptions.ConnectionError:
-            print("网络异常。。")
-        except:
+            print("请求被拒绝")
+        except Exception as e:
+            print("158行，%s"%e)
             self.Error_signal.emit(2)
 
     def kill_process(self):

@@ -67,7 +67,7 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
         self.action_3.triggered.connect(self.init_addUserShouNum)
         self.action_2.triggered.connect(self.addPeople_init)
         self.action_6.triggered.connect(self.add_Jifen)
-        self.action_9.triggered.connect(self.update)
+        self.action_9.triggered.connect(self.update_soft)
         self.action_10.triggered.connect(self.beifen)
         self.action_11.triggered.connect(self.publish_previous)
         self.action_12.triggered.connect(self.init_spendmoney)
@@ -106,6 +106,14 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
         else:
             with open('update.ini','w') as f:
                 f.write("%s,%s,%s"%('','',0))
+            reply = QMessageBox.information(self, "提示", "是否检查更新？", QMessageBox.Yes | QMessageBox.No,
+                                            QMessageBox.Yes)
+            if reply == QMessageBox.Yes:
+                if self.beifen():
+                    # 运行update.exe
+                    subprocess.call("update.exe", shell=True)
+                else:
+                    QMessageBox.information(self, "提示", "备份失败", QMessageBox.Yes)
 
     def clock_beifen(self):
         if datetime.datetime.now().weekday() == 4:
