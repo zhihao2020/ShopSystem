@@ -13,6 +13,7 @@ from email.mime.text import MIMEText
 import logging
 import sqlite3
 import os
+import requests
 import pyautogui
 import subprocess
 from configparser import ConfigParser
@@ -42,11 +43,15 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
         self.clock_beifen()
         self.trayIcon()
         self.wenzitishi = Information()
+
         self.thread = Thread()
         self.thread.sleep_signal.connect(self.windowSleep)
         self.thread.information_signal.connect(self.showInformation)
         self.thread.start()
         QApplication.setQuitOnLastWindowClosed(False)
+        self.update_thread = update_Thread()
+        self.update_thread.update_Signal.connect(self.update_soft)
+        self.update_thread.start()
     def init(self):
         self.cfg = ConfigParser()
         self.cfg.read("config.ini")
@@ -90,13 +95,17 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
         if flag:
             sys.exit(1)
 
-    def update(self):
-        reply = QMessageBox.information(self,"提示","是否升级该软件？",QMessageBox.Yes|QMessageBox.No,QMessageBox.Yes)
-        if reply == QMessageBox.Yes:
-            if self.beifen():
-                #运行update.exe
-                subprocess.call("update.exe",shell=True)
-            else:QMessageBox.information(self,"提示","备份失败",QMessageBox.Yes)
+    def update_soft(self,up_soft):
+        if up_soft:
+            reply = QMessageBox.information(self,"提示","有新版软件，是否更新？",QMessageBox.Yes|QMessageBox.No,QMessageBox.Yes)
+            if reply == QMessageBox.Yes:
+                if self.beifen():
+                    #运行update.exe
+                    subprocess.call("update.exe",shell=True)
+                else:QMessageBox.information(self,"提示","备份失败",QMessageBox.Yes)
+        else:
+            with open('update.ini','w') as f:
+                f.write("%s,%s,%s"%('','',0))
 
     def clock_beifen(self):
         if datetime.datetime.now().weekday() == 4:
@@ -135,7 +144,6 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
         tuopan.setContextMenu(tpMenu)
         tuopan.activated.connect(self.iconActivated)
         tuopan.show()
-        #tuopan.showMessage(u"标题", '托盘信息内容', icon=0)  # icon的值  0没有图标  1是提示  2是警告  3是错误
 
     def iconActivated(self,reason):
         if reason == QSystemTrayIcon.DoubleClick:
@@ -479,22 +487,23 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
             print("select 药品可用金额 from 顾客 where 姓名='%s' or 电话='%s'"%(lis[0],lis[0]))
             tempList = cursor.fetchone()
             money = float(lis[1])+float(tempList[0]) #最后得到的金额
+            if money > 0:
+                reply = QMessageBox.information(self, '提示', '将对该用户 %s 进行充值 %s' % (lis[0],lis[1]), QMessageBox.Yes,QMessageBox.No)
+                if reply == QMessageBox.Yes:
+                    cursor.execute("update 顾客 set 药品可用金额=%s where 姓名='%s' or 电话 ='%s'" % (money,lis[0],lis[0]))
+                    text = "update 顾客 set 药品可用金额=%s where 姓名='%s' or 电话 ='%s'" % (money,lis[0],lis[0])
 
-            reply = QMessageBox.information(self, '提示', '将对该用户 %s 进行充值 %s' % (lis[0],lis[1]), QMessageBox.Yes,QMessageBox.No)
-            if reply == QMessageBox.Yes:
-                cursor.execute("update 顾客 set 药品可用金额=%s where 姓名='%s' or 电话 ='%s'" % (money,lis[0],lis[0]))
-                text = "update 顾客 set 药品可用金额=%s where 姓名='%s' or 电话 ='%s'" % (money,lis[0],lis[0])
+                data = [['直接扣费','','%s'%lis[1],'1']]
 
-            data = [['直接扣费','','%s'%lis[1],'1']]
-
-            Printmain(name=lis[0], phone=lis[0], data=data, fin=lis[1], keyongThing=money)  # 打印小票信息
-            reply = QMessageBox.information(self, "提示", "是否继续打印小票？", QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
-            if reply == QMessageBox.Yes:
-                publish_previous_list = [lis[0],lis[0], data, lis[1], money,None]
-                with open("ppx.json", "w", encoding="utf-8") as fd:
-                    fd.write(json.dumps(publish_previous_list))
                 Printmain(name=lis[0], phone=lis[0], data=data, fin=lis[1], keyongThing=money)  # 打印小票信息
-
+                reply = QMessageBox.information(self, "提示", "是否继续打印小票？", QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
+                if reply == QMessageBox.Yes:
+                    publish_previous_list = [lis[0],lis[0], data, lis[1], money,None]
+                    with open("ppx.json", "w", encoding="utf-8") as fd:
+                        fd.write(json.dumps(publish_previous_list))
+                    Printmain(name=lis[0], phone=lis[0], data=data, fin=lis[1], keyongThing=money)  # 打印小票信息
+            else:
+                QMessageBox.information(self,"提示","用户 %s 剩余金额不足"%lis[0],QMessageBox.Yes)
         except IOError:
             QMessageBox.critical(self, "警告", "请检查数据库文件\n或与管理员联系\n错误代码:4501", QMessageBox.Yes)
         except Exception as e:
@@ -882,6 +891,39 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
             self.label_5.setText(" ")
             self.showShoufa.clear()
             self.showYaopin.clear()
+
+class update_Thread(QThread,Ui_mainWindow):
+    update_Signal = pyqtSignal(bool)
+    def __init__(self):
+        super(update_Thread,self).__init__()
+
+    def run(self):
+        # 确定当前软件是否为最新版
+        try:
+            params = {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.129 Safari/537.36",
+                "Host": "api.github.com"}
+            response = requests.get("https://api.github.com/repos/zhihao2020/ShopSystem/releases/latest", params=params)
+            while response.status_code != 200:
+                time.sleep(1200)
+
+            temp = json.loads(response.text)
+            self.latest_tag = temp["tag_name"]
+            print(self.latest_tag)
+            if not os.path.exists("softID.io"):
+                file = open("softID.io","w")
+                file.close()
+            with open("softID.io",'r') as f:
+                previous_tag = f.readline()
+            if self.latest_tag != previous_tag:
+                with open("update.ini","w") as f_update:
+                    download_url = temp["assets"][0]['browser_download_url']
+                    file_size = temp['assets'][0]['size']
+                    f_update.write("%s,%s,%s"%(download_url, file_size,1))
+                    self.update_Signal.emit(True)
+        except requests.exceptions.ConnectionError:
+            time.sleep(1200)
+            self.check_latest()
 
 class Thread(QThread,Ui_mainWindow):
     #检测用户无输入，自动休眠

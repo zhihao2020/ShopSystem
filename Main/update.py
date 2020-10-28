@@ -110,7 +110,14 @@ class Thread(QThread,Ui_Form):
 
     def run(self):
         try:
-            download_url, file_size = self.check_latest()
+            with open('update.ini','r') as f:
+                lines = f.readline()
+                if lines.split(',')[2] == 1:
+                    download_url = lines.split(',')[0]
+                    file_size = lines.split(',')[1]
+
+                elif lines.split(',')[2] == 0:
+                    download_url, file_size = self.check_latest()
             self.kill_process()
             self.download(download_url, file_size)
             self.Button_signal.emit(True)
@@ -118,8 +125,9 @@ class Thread(QThread,Ui_Form):
             with open("softID.io", 'w') as f:
                 f.write(self.latest_tag)
             self.End_signal.emit(1)
-        except TypeError:
+        except :
             self.Error_signal.emit(2)
+
     def check_latest(self):
         # 确定当前软件是否为最新版
         params = {
@@ -145,6 +153,8 @@ class Thread(QThread,Ui_Form):
                 self.New_signal.emit(3)
         except requests.exceptions.ConnectionError:
             print("网络异常。。")
+        except:
+            self.Error_signal.emit(2)
 
     def kill_process(self):
         for proc in psutil.process_iter():

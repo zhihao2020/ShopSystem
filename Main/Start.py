@@ -41,7 +41,7 @@ class Load_login(QMainWindow,Ui_widget):
                 self.is_admin_signal.emit()
             else:
                 print(QMessageBox.information(self, "提示", "密码错误", QMessageBox.Yes, QMessageBox.Yes))
-
+        dbs.close()
     def jump(self):
         self.close()
         self.jumper = myMainWindow.reload_mainWin()
