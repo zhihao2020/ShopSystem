@@ -51,7 +51,8 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
         QApplication.setQuitOnLastWindowClosed(False)
         self.update_thread = update_Thread()
         self.update_thread.update_Signal.connect(self.update_soft)
-        self.update_thread.start()
+        if datetime.datetime.now().weekday() == 3:
+            self.update_thread.start()
     def init(self):
         self.cfg = ConfigParser()
         self.cfg.read("config.ini")
@@ -138,12 +139,9 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
             return True
 
     def trayIcon(self):
-
         tuopan = QSystemTrayIcon(self)
         tuopan.setIcon(QtGui.QIcon(r"images/snail.ico"))
-
         tuopan.setToolTip(u"欢迎使用医琦软件")
-
         a1 = QAction('&显示(Show)',self,triggered=self.showNormal)
         a2 = QAction('&退出(Exit)',self,triggered=self.quit_app)  # 直接退出可以用qApp.quit
         tpMenu = QMenu()
@@ -706,32 +704,37 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
         return self.yaopin, self.shoufa
 
     def Check_money(self):
-        sumThing = 0
-        for tempList in self.yaopin:
-            sumThing += float(tempList[2].text()) * float(tempList[3].value())
+        try:
+            sumThing = 0
+            for tempList in self.yaopin:
+                sumThing += float(tempList[2].text()) * float(tempList[3].value())
 
-        if self.money_vaild_2.value() - sumThing < 0:
-            QMessageBox.warning(self, "警告", "账号余额不足", QMessageBox.Yes)
-        else:
-            reply = QMessageBox.information(self, "提示", "商品消费 %s元" % sumThing, QMessageBox.Yes|QMessageBox.No)
-            if reply == QMessageBox.Yes:
-                rest_money = self.money_vaild_2.value() - sumThing
-                return sumThing, rest_money
+            if self.money_vaild_2.value() - sumThing < 0:
+                QMessageBox.warning(self, "警告", "账号余额不足", QMessageBox.Yes)
             else:
-                return None
+                reply = QMessageBox.information(self, "提示", "商品消费 %s元" % sumThing, QMessageBox.Yes|QMessageBox.No)
+                if reply == QMessageBox.Yes:
+                    rest_money = self.money_vaild_2.value() - sumThing
+                    return sumThing, rest_money
+                else:
+                    return None
+        except Exception as e:
+            QMessageBox.warning(self, "警告", "%s\n错误代码：999" % e)
+            logging.warning(e)
 
     def Clearing_Yaopin(self):
         # 增加一个 数据结构
         # 如果正常 返回 积分、可用商品余额、商品名称和剩余次数的列表
-        print("------结算药品-----")
-        restThing = 0
-        jifen = 0
-        Thing_FinList = []
-        keyongThing = 0
-        sumThing = 0
-        conn = sqlite3.connect("data/all.db")
-        cursor = conn.cursor()
         try:
+            print("------结算药品-----")
+            restThing = 0
+            jifen = 0
+            Thing_FinList = []
+            keyongThing = 0
+            sumThing = 0
+            conn = sqlite3.connect("data/all.db")
+            cursor = conn.cursor()
+
             for tempList in self.yaopin:
                 if self.cust_name.text().strip():
                     cursor.execute("SELECT 库存数量 from things where 名称='%s'" % tempList[1].text())
