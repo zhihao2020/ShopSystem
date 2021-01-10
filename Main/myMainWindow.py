@@ -490,10 +490,10 @@ class reload_mainWin(QMainWindow, Ui_mainWindow):
             conn = sqlite3.connect("data/all.db")
             cursor = conn.cursor()
             cursor.execute("select 药品可用金额 from 顾客 where 姓名='%s' or 电话 ='%s'"%(lis[0],lis[0]))
-            print("select 药品可用金额 from 顾客 where 姓名='%s' or 电话='%s'"%(lis[0],lis[0]))
+            #print("select 药品可用金额 from 顾客 where 姓名='%s' or 电话='%s'"%(lis[0],lis[0]))
             tempList = cursor.fetchone()
             money = float(lis[1])+float(tempList[0]) #最后得到的金额
-            if money > 0:
+            if money >= 0:
                 reply = QMessageBox.information(self, '提示', '将对该用户 %s 进行充值 %s' % (lis[0],lis[1]), QMessageBox.Yes,QMessageBox.No)
                 if reply == QMessageBox.Yes:
                     cursor.execute("update 顾客 set 药品可用金额=%s where 姓名='%s' or 电话 ='%s'" % (money,lis[0],lis[0]))
